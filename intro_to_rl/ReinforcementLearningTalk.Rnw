@@ -1,0 +1,2041 @@
+\documentclass{beamer}
+%\documentclass[notes]{beamer}
+
+\usepackage{hyperref}
+\usepackage{url}
+\usepackage{Sweave}
+\usepackage{subfigure}
+%\usepackage[utf8]{inputenc}
+%\usepackage{booktabs}
+\usepackage{caption}
+\usepackage{float} 
+\usepackage{attrib} 
+\usepackage{xcolor} 
+%\usepackage{multicol}
+\usepackage{tikz}
+\usepackage{graphicx}
+\usepackage{transparent}
+\usetikzlibrary{shapes,backgrounds}
+\usetikzlibrary{automata}
+\usetikzlibrary{arrows,positioning}
+\usetikzlibrary{trees}
+\usepackage{tikz-qtree}
+%\usetikzlibrary{bayesnet}
+
+%\usepackage{signalflowdiagram}
+
+\usepackage{schemabloc}
+\usepackage[framemethod=tikz]{mdframed}
+
+\definecolor{links}{HTML}{2A1B81}
+\hypersetup{colorlinks,linkcolor=,urlcolor=links}
+
+\definecolor{mydarkblue}{HTML}{0066CC}
+\definecolor{mydarkred}{HTML}{990000}
+\definecolor{mydarkgreen}{HTML}{006600}
+\definecolor{myblue}{HTML}{336699}
+
+\tikzstyle{normalnode}=[draw,%
+                          rectangle,%
+                          shade,%
+                          minimum size  = 1.0cm,%
+                          node distance = 1.3cm]
+ \tikzstyle{normalnode2}=[draw,%
+                          rectangle,%
+                          shade,%
+                          minimum size  = 1.0cm,%
+                          node distance = 1.0cm]
+  \tikzstyle{normalnode3}=[draw,%
+                          rectangle,%
+                          shade,%
+                          minimum size  = 1.0cm,%
+                          node distance = 5.0cm]
+  \tikzstyle{normal}=[draw,fill=myblue,rectangle, minimum size=1.0cm,node
+  distance=2cm, text=white] 
+  \tikzstyle{start}=[draw,fill=green!70,rectangle, minimum size=1.0cm,node distance=1.3cm]                        
+  \tikzstyle{goal}=[draw,fill=red!70,rectangle, minimum size=1.0cm,node distance=1.3cm]
+  \tikzstyle{goal2}=[draw,fill=red!70,rectangle, minimum size=1.0cm,node distance=1.0cm]
+  \tikzstyle{agent}=[draw,fill=blue!70,circle,minimum size=0.6cm]
+  \tikzstyle{dummy}=[circle]
+\usetikzlibrary{automata,chains}
+
+\usetikzlibrary{positioning}
+\usetikzlibrary{intersections}
+
+\definecolor{myblue}{HTML}{336699}
+
+\setbeamertemplate{blocks}[rounded=true, shadow=true] 
+\setbeamercolor{block title}{bg=myblue,fg=white}
+\setbeamercolor{frametitle}{myblue}
+\setbeamercolor{title}{myblue}
+\usecolortheme[named=myblue]{structure}
+
+%% Add support for \subsubsectionpage
+%\def\subsubsectionname{\translate{Subsubsection}}
+%\def\insertsubsubsectionnumber{\arabic{subsubsection}}
+%\setbeamertemplate{section page}
+%{
+%  \begin{centering}
+%    \begin{beamercolorbox}[sep=4pt,center]{part title}
+%      \usebeamerfont{section title}\insertsection\par
+%    \end{beamercolorbox}
+%  \end{centering}
+%}
+%\setbeamertemplate{subsubsection page}
+%{
+%  \begin{centering}
+%    {\usebeamerfont{subsubsection name}\usebeamercolor[fg]{subsubsection
+%    name}\subsubsectionname~\insertsubsubsectionnumber} 
+%    \vskip1em\par
+%    \begin{beamercolorbox}[sep=4pt,center]{part title}
+%      \usebeamerfont{subsubsection title}\insertsubsubsection\par
+%    \end{beamercolorbox}
+%  \end{centering}
+%}
+%\def\subsubsectionpage{\usebeamertemplate*{subsubsection page}}
+%
+%\AtBeginSection{\frame{\sectionpage}}
+%\AtBeginSubsection{\frame{\subsectionpage}}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+\title{In Search of Pi} 
+\subtitle{A Short Guide to Acting Like a Robot}
+\author{Shane Conway} 
+\institute{
+\textit{smc77@columbia.edu, @statalgo} 
+}
+\date{\today} 
+
+\AtBeginSection[]{
+   \setbeamercolor{section in toc shaded}{use=structure,fg=structure.fg}
+   \setbeamercolor{section in toc}{fg=myblue}
+   \setbeamercolor{subsection in toc shaded}{fg=black}
+   \setbeamercolor{subsection in toc}{fg=myblue}
+  \frame<beamer>{%\begin{multicols}
+  \frametitle{Outline}
+  \setcounter{tocdepth}{2}  
+  \tableofcontents[currentsection,subsections]
+%\end{multicols} 
+ }
+}
+
+
+{
+  \usebackgroundtemplate{\includegraphics[width=1.0\paperwidth, height=1.0\paperheight]{../images/pi-cake-2013.jpg}} %
+  \begin{frame}[plain]
+\vspace{15em}
+\begin{mdframed}[tikzsetting={draw=black,fill=white,fill opacity=0.7,
+               line width=4pt},backgroundcolor=none,leftmargin=0,
+               rightmargin=40,innertopmargin=4pt]
+{\huge In Search of Pi}\\
+A General Introduction to Reinforcement Learning\\
+Shane M. Conway\\
+{\footnotesize \href{http://twitter.com/statalgo}{@statalgo}, \href{http://www.statalgo.com}{www.statalgo.com}, \href{mailto: smc77@columbia.edu}{smc77@columbia.edu}}
+\end{mdframed}
+  \end{frame}
+}
+
+% \frame{\titlepage} 
+
+\note{
+\begin{itemize}
+\item https://www.youtube.com/watch?v=5ohlA__xABw
+\item Let me just do a quick informal survey: how many of you have ever used reinforcement learning to solve a problem?  How many of you have ever seen a markov decision process?
+\item I'm going to try to do something that is roughly impossible, which is to cover the entirety of reinforcement learning, from the basics to the cutting edge, in about 45 minutes, and then run through some examples of this in R using a new package.
+\item I will start to build an intuition for reinforcement learning by placing it in context compared to (a) other kinds of machine learning models and (b) markov models.
+\item Mike Dewar's talk last month on Streams.  If more data is in streams, then we need algorithms to model streaming data (i.e. data which always has time as a feature).
+\end{itemize}
+}
+
+\frame{
+
+\begin{quote}
+"It would be in vain for one \textbf{intelligent Being}, to set a Rule to the Actions of another, if he had not in his Power, to \textbf{reward} the compliance with, and \textbf{punish} deviation from his Rule, by some Good and Evil, that is not the natural product and \textbf{consequence of the action} itself." (Locke, "Essay", 2.28.6)
+\end{quote}
+
+\note{
+One example of this line of reasoning from philosophy.  John Locke captures many aspects of a reinforcement learning system (emphasis mine):
+\begin{itemize}
+\item The intelligent being sets rules, akin to the environment in RL.  
+\item The "consequence of the action" results in rewards and punishments, just as there exists a reward function in RL.
+\end{itemize}
+}
+
+%\pause
+
+\begin{quote}
+"The use of punishments and rewards can at best be a part of the teaching process. Roughly speaking, if the teacher has no other means of communicating to the pupil, the amount of information which can reach him does not exceed \textbf{the total number of rewards and punishments applied}." \href{http://orium.pw/paper/turingai.pdf
+}{(Turing (1950) "Computing Machinery and Intelligence")}
+\end{quote}
+
+\note{
+Alan Turing famously considered the ideas of reinforcement learning when developing his ideas around the measures of AI (the Turing Test).
+\begin{itemize}
+\item "the total number of rewards and punishments applied": there is some function that accumulates knowledge of rewards and punishments, which is the value function in RL.
+\end{itemize}
+}
+
+}
+
+\frame{\frametitle{Table of contents}\tableofcontents} 
+
+% Resources:
+% http://users.isr.ist.utl.pt/~mtjspaan/readingGroup/slides04012007.pdf
+
+<<echo=FALSE>>=
+library(xtable)
+library(ggplot2)
+@
+
+
+\section{The recipe (some context)} 
+
+{
+\usebackgroundtemplate{% width=\paperwidth,
+\parbox[c][\paperheight][c]{\paperwidth}{
+\begin{figure}[H]
+\begin{center}
+%   \tikz\node[opacity=0.2] {\includegraphics[height=\paperheight, right]{../images/cartoon_4.jpg}};
+\end{center}
+\end{figure}
+}
+}
+
+\frame{
+
+\begin{center}
+{\huge What is Reinforcement Learning?}\\
+
+\vspace{12 mm}
+
+{\Large Some context}
+\end{center}
+
+}
+}
+
+\frame{\frametitle{Why is reinforcement learning so rare here?} 
+
+\begin{figure}[!h]
+\begin{center}
+\href{http://redd.it/2bigsf}{\includegraphics{../images/reddit_head.png}}
+\caption{{\footnotesize The machine learning sub-reddit on July 23, 2014. %is more interested in topics like deep neural networks that reinforcement learning
+}}
+\end{center}
+\end{figure}
+
+\pause
+
+Reinforcement learning is useful for optimizing the long-run behavior of an agent: 
+
+\begin{itemize}
+  \item Handles more complex environments than supervised learning %http://webdocs.cs.ualberta.ca/~sutton/papers/sutton-88-with-erratum.pdf
+  \item Provides a powerful framework for modeling streaming data
+\end{itemize}
+
+\note{
+\begin{itemize}
+  \item I am going to argue that reinforcement learning is under-represented within the popular/professional machine learning community, and that it's applicability should grow over time as more data is viewed as streams and online learning instead of batch learning.
+  \item Popular culture has been focusing on things like deep nets, and that's largely a function of the success stories in the media, especially w.r.t. big data.  But there is a very large academic interest in RL, as is visible from things like ICML or NIPS.
+  \item Another cause for this lack of interest is a lack of good software.  There are currently no R packages for RL, and Python is fairly weak.
+  \item Lastly, there is a perception that RL isn't understood.  A typical problem results from the curse of dimensionality, that it is impossible to both accurately represent an RL problem while also being sure of it's convergence.
+  \item I will have achieved my goal with this talk if you think about whether you might be able to apply these methods to your own domain the next time you encounter a problem that consists of sequences of actions.
+\end{itemize}
+}
+
+}
+
+\frame{\frametitle{Machine Learning} 
+
+Machine Learning is often introduced as distinct three approaches:
+
+\begin{itemize}
+  \item Supervised Learning
+  \item Unsupervised Learning
+  \item Reinforcement Learning 
+\end{itemize}
+%\pause
+
+\note{
+
+This picture is more complicated when you consider methods such as semi-supervised and active learning.  Also, RL historically intimately related to Neural Networks (Neuro-Dynamic Programming, Actor-Critic).
+
+Reinforcement learning is not covered at all in Bishop or ESL.  It is covered in Mitchell.
+
+In the problem of reinforcement learning, an agent exploresthe space of possible strategies
+and receives feedback on the outcome of the choices made. From this information, a
+“good” – or ideally optimal – policy (i.e., strategy or controller) must be deduced.
+Reinforcement learning may be understood by contrasting the problem with other
+areas of study in machine learning. In supervised learning (Langford and Zadrozny,
+2005), an agent is directly presented a sequence of independent examples of correct
+predictions to make in diﬀerent circumstances. In imitation learning, an agent is provided
+demonstrations of actions of a good strategy to follow in given situations (Argall et al.,
+2009; Schaal, 1999). From http://www.ri.cmu.edu/pub_files/2013/7/Kober_IJRR_2013.pdf, p.3
+}
+
+}
+\frame{\frametitle{Machine Learning (Relationships)} 
+
+\begin{figure}[H]
+\begin{center}
+
+\begin{tikzpicture}
+  \tikzset{venn circle/.style={draw,circle,minimum width=5cm,fill=#1,opacity=0.6}}
+
+  \node [venn circle = red, align=left] (A) at (0,0) {$$};
+  \node at (-1cm, -1cm) {$Reinforcement$};
+  \node [venn circle = blue, align=top] (B) at (1.5cm,2cm) {$$};
+  \node at (1.5cm, 4cm) {$Supervised$};
+  \node [venn circle = green, align=right] (C) at (3cm, 0) {$$};
+  \node at (5cm, -1cm) {$Unsupervised$};
+  \node[left] at (barycentric cs:A=1/2,B=1/2 ) {$RL Function \\ Approx.$}; 
+  \node[below] at (barycentric cs:A=1/2,C=1/2 ) {$$};   
+  \node[right] at (barycentric cs:B=1/2,C=1/2 ) {$Semi-Supervised$};   
+  \node[below] at (barycentric cs:A=1/3,B=1/3,C=1/3 ){$Active$};
+\end{tikzpicture}  
+\end{center}
+% \caption[]
+%  {Different branches of machine learning, along with methods for combining such as function approximation, semi-supervised learning, and active learning.}
+  \label{fig:reinforcement_cycle}
+\end{figure}
+
+}
+
+\frame{\frametitle{Machine Learning (Complexity and Reductions)} 
+
+% \begin{tikzpicture}
+% 
+% \begin{scope}[shift={(3cm,-5cm)}, fill opacity=0.5,
+%   mytext/.style={text opacity=1,font=\large\bfseries}]
+% 
+% %\draw[fill=red, draw = black] (0,0) circle (5);
+% \draw[fill=yellow, draw = black, name path=circle 1] (-1.5,0) circle (4);
+% \draw[fill=blue, draw = black, name path=circle 2] (1.5,0) circle (3);
+% 
+% \pgftransparencygroup
+% \clip (-1.5,0) circle (3);
+% \fill[green] (1.5,0) circle (3);
+% \filldraw[draw,fill=green,name intersections={of=circle 1 and circle 2}] (intersection-1) .. controls +(-4,1) and +(-4,-1) ..(intersection-2);
+% \endpgftransparencygroup
+% 
+% %\node[mytext] at (0,4) (A) {A};
+% \node[mytext] at (-3.8,0) (B) {Reinforcement};
+% \node[mytext] at (3.8,0) (C) {Unsupervised};
+% \node[mytext] at (0,0) (D) {Semi-Supervised};
+% \node[mytext] at (-2,1) (E) {Supervised};
+% \end{scope}
+% \end{tikzpicture}
+
+\begin{figure}[H]
+\begin{center}
+
+<<complexity, fig=TRUE, echo=FALSE, widht=8, height=4>>=
+df <- data.frame(x=c(0, 0, 0, 0.5, 1, 1.5, 5), y=c(0, 1, 1.75, 5, 3, 2.25, 5), types=c("Binary Classification", "Supervised Learning", "Cost-sensitive Learning", "Contextual Bandit", "Structured Prediction", "Imitation Learning", "Reinforcement Learning"))
+print(ggplot(df, aes(x=x, y=y, label=types)) + geom_text() + xlab("Interactive/Sequential Complexity") + ylab("Reward Structure Complexity") + theme_bw() + theme(axis.ticks.x=element_blank(), axis.ticks.y=element_blank(), axis.text.x = element_blank(), axis.text.y = element_blank()) + xlim(-1.5, 6.5))
+@
+
+  \label{fig:reinforcement_cycle}
+\end{center}
+\end{figure}
+
+\begin{flushright}
+{\footnotesize (Langford/Zadrozny 2005) }
+\end{flushright}
+
+
+}
+
+\frame{\frametitle{Reinforcement Learning} 
+
+\begin{quote}
+...the idea of a learning system that \emph{wants} something.  This was the idea of a \textbf{"hedonistic"} learning system, or, as we would say now, the idea of reinforcement learning.
+\\
+\begin{flushright}
+- Barto/Sutton (1998), p.viii
+\end{flushright}
+\end{quote}
+
+\vspace{5mm}
+
+\begin{beamerboxesrounded}[shadow=true]{Definition}
+\begin{itemize}
+\item Agents take actions in an environment and receive rewards
+\item Goal is to find the policy \textbf{$\pi$} that maximizes rewards
+\item Inspired by research into psychology and animal learning
+\end{itemize}
+\end{beamerboxesrounded}
+
+}
+
+
+\frame{\frametitle{RL Model} 
+
+In a single agent version, we consider two major components: the \emph{agent} and the \emph{environment}.  
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,
+  thick,main
+  node/.style={circle,fill=myblue,draw,text=white,font=\sffamily\Large\bfseries}]
+ %nodes
+ \node[] (center);
+ % We make a dummy figure to make everything look nice.
+ \node[top=of center, fill=myblue, text=white] (t) {Agent};
+ \node[below=of center, fill=myblue, text=white] (g) {Environment};
+
+  \path[every node/.style={font=\sffamily\small}]
+  (t) edge[bend left=65] node[auto] {Action} (g)
+  (g) edge[bend left=65] node[auto] {Reward, State} (t);
+\end{tikzpicture}
+\end{center}
+% \caption[Generalized Policy Iteration]
+%  {The reinforcement learning cycle, from agent to environment, back to agent.}
+  \label{fig:reinforcement_cycle}
+\end{figure}
+
+The agent takes actions, and receives updates in the form of state/reward pairs.
+
+\note{
+The environment is the real world, which gives the agent some form of feedback.  We can think of the environment as being $y$ and the agent as having $f(x)$, an estimate of the true $y$.
+}
+
+}
+
+\frame{\frametitle{Reinforcement Learning (Fields)} 
+
+Reinforcement learning gets covered in a number of different fields:
+
+\begin{itemize}
+  \item Artificial intelligence/machine learning
+  \item Control theory/optimal control
+  \item Neuroscience
+  \item Psychology
+\end{itemize}
+
+One primary research area is in \emph{robotics}, although the same methods are applied under \emph{optimal control theory} (often under the subject of \emph{Approximate Dynamic Programming}, or \emph{Sequential Decision Making Under Uncertainty}.)
+
+}
+
+\frame{\frametitle{Reinforcement Learning (Fields)} 
+
+
+\begin{figure}[!h]
+    %\caption{My caption}
+\begin{center}
+\includegraphics{../images/application.png}
+%\caption{Skinner's "operant conditioning chamber"}
+\end{center}
+\end{figure}
+
+\begin{center}
+{\small
+From \href{http://videolectures.net/icml09_sutton_itdrl/}{"Deconstructing Reinforcement Learning" ICML 2009}
+}
+\end{center}
+
+}
+
+
+{
+\usebackgroundtemplate{% width=\paperwidth,
+%\centering
+%   \tikz\node[opacity=0.3] {
+%   \includegraphics[height=\paperheight]{../images/AIMA.jpg}
+\parbox[c][\paperheight][c]{\paperwidth}{
+\begin{figure}
+\begin{center}
+%  \tikz\node[opacity=0.2] {\includegraphics[height=\paperheight, right]{../images/AIMA.jpg}};
+% }
+\end{center}
+\end{figure}
+}%
+}
+
+
+\frame{\frametitle{Artificial Intelligence} 
+
+Major goal of Artificial Intelligence: build intelligent agents.
+
+\begin{quote}
+
+"An agent is anything that can be viewed as perceiving its environment through sensors and acting upon that environment through actuators". 
+\\
+\begin{flushright}
+Russell and Norvig (2003)
+\end{flushright}
+\end{quote}
+
+%http://webdocs.cs.ualberta.ca/~greiner/C-366/SLIDES/17b-POMDP.pdf
+
+\begin{enumerate}
+  \item Belief Networks (Chp. 14)
+  \item Dynamic Belief Networks (Chp. 15)
+  \item Single Decisions (Chp. 16)
+  \item Sequential Decisions (Chp. 17) (includes MDP, POMDP, and Game Theory)
+  \item Reinforcement Learning (Chp. 21)
+\end{enumerate}
+
+}
+}
+
+\frame{\frametitle{Major Considerations} 
+
+{\LARGE
+\begin{itemize}
+  \item Generalization (Learning)
+  \item Sequential Decisions (Planning)
+  \item Exploration vs. Exploitation (Multi-Armed Bandits)
+  \item Convergence (PAC learnability)
+\end{itemize}
+}
+}
+
+\frame{\frametitle{Variations} 
+
+{\Large
+\begin{itemize}
+ \item Type of uncertainty.
+ \item Full vs. partial state observability.
+ \item Single vs. multiple decision-makers.
+ \item Model-based vs. model-free methods.
+ \item Finite vs. infinite state space.
+ \item Discrete vs. continuous time.
+ \item Finite vs. infinite horizon.
+\end{itemize}
+}
+
+}
+
+\frame{\frametitle{Key Ideas} 
+
+{\Large
+\begin{enumerate}
+  \item Time/life/interaction
+  \item Reward/value/verification
+  \item Sampling
+  \item Bootstrapping
+\end{enumerate}
+}
+
+\vspace{10 mm}
+
+Richard Sutton's list of key ideas for reinforcement learning (\href{http://videolectures.net/icml09_sutton_itdrl/}{"Deconstructing Reinforcement Learning" ICML 2009})
+
+\note{
+"...we note one last special property of DP methods. All of them update estimates of the values of states based on estimates of the values of successor states. That is, they update estimates on the basis of other estimates. We call this general idea bootstrapping. Many reinforcement learning methods perform bootstrapping, even those that do not require, as DP requires, a complete and accurate model of the environment." (B&S, 103)
+}
+
+}
+
+
+\section{Looking at other pi's (motivating examples)} 
+
+
+
+{
+\usebackgroundtemplate{% width=\paperwidth,
+\parbox[c][\paperheight][c]{\paperwidth}{
+\begin{figure}[H]
+\begin{center}
+%  \tikz\node[opacity=0.2] {\includegraphics[height=\paperheight, right]{../images/cartoon_4.jpg}};
+\end{center}
+\end{figure}
+}
+}
+
+\frame{
+
+\begin{center}
+{\huge How is Reinforcement Learning \\
+being used?}\\
+
+% \vspace{12 mm}
+% 
+% {\Large Some context}
+\end{center}
+
+}
+
+}
+
+\frame{\frametitle{Behaviorism} 
+
+\begin{figure}[!h]
+    %\caption{My caption}
+\begin{center}
+\includegraphics{../images/cartoon_2.jpg}
+%\caption{Skinner's "operant conditioning chamber"}
+\end{center}
+\end{figure}
+
+
+}
+
+\frame{\frametitle{Human Trials} 
+
+\begin{figure}[!h]
+    %\caption{My caption}
+\begin{center}
+\includegraphics{../images/pavlok.png}
+\caption{"\href{http://pavlok.com/}{How Pavlok Works}: Earn Rewards when you Succeed. Face Penalties if you Fail.  Choose your level of commitment. Pavlok can reward you when you achieve your goals. Earn prizes and even money when you complete your daily task. But be warned: if you fail, you'll face penalties. Pay a fine, lose access to your phone, or even suffer an electric shock...at the hands of your friends."}
+\end{center}
+\end{figure}
+
+}
+
+
+\frame{\frametitle{Shortest Path, Travelling Salesman Problem} 
+
+%http://en.wikipedia.org/wiki/Travelling_salesman_problem
+
+\begin{quote}
+Given a list of cities and the distances between each pair of cities, what is the shortest possible route that visits each city exactly once and returns to the origin city?
+\end{quote}
+
+\includegraphics[width=0.9\textwidth]{../images/travelling_salesman_problem.png}
+
+\begin{itemize}
+ \item \href{http://dl.acm.org/citation.cfm?doid=321105.321111}{Bellman, R. (1962), "Dynamic Programming Treatment of the Travelling Salesman Problem"}
+ \item\href{http://mchouza.wordpress.com/2010/11/21/solving-the-travelling-salesman-problem/}{Example in python from Mariano Chouza}
+\end{itemize}
+
+}
+
+\frame{\frametitle{TD-Gammon} 
+
+{\small
+Tesauro (1995) "Temporal Difference Learning and TD-Gammon" may be the most famous success story for RL, using a combination of the TD($\lambda$) algorithm and nonlinear function approximation using a multilayer neural network trained by backpropagating TD errors.
+}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{../images/td-gammon.png}
+\end{center}
+\end{figure}
+
+}
+
+\frame{\frametitle{Go} 
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.95\textwidth]{../images/go_states.png}
+\end{center}
+\end{figure}
+
+\begin{center}
+{\small
+\href{http://videolectures.net/icml09_sutton_itdrl/}{From Sutton (2009) "Deconstructing Reinforcement Learning" ICML}
+}
+\end{center}
+
+}
+
+\frame{\frametitle{Go} 
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.95\textwidth]{../images/go_samples.png}
+\end{center}
+\end{figure}
+
+\begin{center}
+{\small
+\href{http://videolectures.net/icml09_sutton_fgdm/}{From Sutton (2009) "Fast Gradient-Descent Methods for Temporal-Difference Learning with Linear Function Approximation" ICML}
+}
+\end{center}
+
+}
+
+\frame{\frametitle{Andrew Ng's Helicopters} 
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.95\textwidth]{../images/heli.jpg}
+\end{center}
+\end{figure}
+
+\begin{center}
+{\small
+\href{https://www.youtube.com/watch?v=Idn10JBsA3Q}{https://www.youtube.com/watch?v=Idn10JBsA3Q}
+}
+\end{center}
+
+
+}
+
+% \frame{\frametitle{RoboSoccer} 
+% 
+% 
+% 
+% }
+% 
+% \frame{\frametitle{Game Playing} 
+% 
+% http://www.marioai.org/
+% http://www.platformersai.com/
+% http://noorshaker.com/docs/theMarioAI.pdf
+% http://dces.essex.ac.uk/staff/sml/pacman/PacManContest.html
+% 
+% http://ieeexplore.ieee.org/xpl/RecentIssue.jsp?punumber=4804728
+% General game playing: http://gvgai.net/
+% 
+% "Playing Atari with Deep Reinforcement Learning"
+% http://arxiv.org/abs/1312.5602
+% 
+% (From Deep Mind)
+% http://en.wikipedia.org/wiki/DeepMind_Technologies
+% 
+% }
+% 
+% \frame{\frametitle{Google Robotics} 
+% 
+% Self-driving cars
+% Boston Dynamics
+% 
+% }
+% 
+% 
+% \frame{\frametitle{Optimal Liquidation Problem} 
+% 
+% Kearns/Nevmyvaka (2005) "" and ...
+% 
+% Execute 
+% 
+% [Picture]
+% 
+% }
+% 
+% \frame{\frametitle{Website Optimization} 
+% 
+% Multi-armed bandit
+% 
+% }
+
+
+\section{Prep the ingredients (the simplest example)}
+
+
+\frame{
+
+\begin{center}
+{\huge Multi-Armed Bandits}\\
+
+\vspace{12 mm}
+
+{\Large Single-state reinforcement learning problems.}
+\end{center}
+
+}
+}
+
+
+{
+\usebackgroundtemplate{% width=\paperwidth,
+\parbox[c][\paperheight][c]{\paperwidth}{
+% \begin{figure}[H]
+% \begin{center}
+%   \tikz\node[opacity=0.2] {\includegraphics[width=1\paperwidth, height=1\paperheight]{../images/bandit.jpg}};
+% \end{center}
+% \end{figure}
+}
+
+}
+
+\frame{\frametitle{Multi-Armed Bandits} 
+
+A simple introduction to the reinforcement learning problem is the case when there is only one state, also called a \href{http://en.wikipedia.org/wiki/Multi-armed_bandit}{\emph{multi-armed bandit}}.  This was named after the slot machines (one-armed bandits).
+
+\vspace{5mm}
+
+\begin{beamerboxesrounded}[shadow=true]{Definition}
+\begin{itemize}
+  \item Set of actions $A = {1, ..., n}$
+  \item Each action gives you a random reward with distribution $P(r_t|a_t = i)$
+  \item The value (or utility) is $V = \sum_t r_t$
+\end{itemize}
+\end{beamerboxesrounded}
+
+
+}
+}
+
+\frame{\frametitle{Exploration vs. Exploitation} 
+
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[height=0.9\textheight, keepaspectratio]{../images/e_e_1.png}
+\end{center}
+\end{figure}
+
+\pause
+\end{column}%
+\hfill%
+\begin{column}{0.6\textwidth}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[height=0.9\textheight, keepaspectratio]{../images/e_e_2.png}
+\end{center}
+\end{figure}
+
+\end{column}%
+\end{columns}
+
+}
+
+
+\frame{\frametitle{$\epsilon$-Greedy} 
+
+The $\epsilon$-Greedy algorithm is one of the simplest and yet most popular approaches to solving the exploration/exploitation dilemma.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{../images/epsilongreedy.png}
+\end{center}
+\end{figure}
+
+
+\vspace{5 mm}
+
+\begin{center}
+\href{http://blog.yhathq.com/posts/the-beer-bandit.html}{(picture courtesy of "Python Multi-armed Bandits" by Eric Chiang, yhat)}
+\end{center}
+
+}
+
+
+\section{Mixing the ingredients (models)}
+
+
+{
+\usebackgroundtemplate{% width=\paperwidth,
+\parbox[c][\paperheight][c]{\paperwidth}{
+\begin{figure}[H]
+\begin{center}
+%  \tikz\node[opacity=0.2] {\includegraphics[height=\paperheight, right]{../images/cartoon_4.jpg}};
+\end{center}
+\end{figure}
+}
+}
+
+
+\frame{
+
+\begin{center}
+{\huge Reinforcement Learning Models}\\
+
+\vspace{12 mm}
+
+{\Large Especially Markov Decision Processes.}
+\end{center}
+
+}
+}
+
+\frame{\frametitle{Dynamic Decision Networks} 
+
+Bayesian networks are a popular method for characterizing probabilistic models.  These can be extended as a Dynamic Decision Network (DDN) with the addition of decision (action) and utility (value) nodes. 
+
+\vspace{5mm}
+
+\begin{center}
+\begin{tikzpicture}[sibling distance=5cm, level 2/.style={sibling distance =2cm}]
+
+\node[draw] at (3,-5) 
+{
+\begin{tabular}{cl}
+\tikz\node[circle,draw] {s}; & state \\
+\tikz\node[square,draw] {a}; & decision \\
+\tikz\node[diamond,draw] {r}; & utility
+\end{tabular}
+};
+\end{tikzpicture}
+\end{center}
+
+}
+
+
+\frame{\frametitle{Markov Models} 
+
+We can extend the markov process to study other models with the same the property.
+
+% From http://books.google.com/books?id=2qk-5rpAB0AC&dq=hmm+pomdp+do+we+have+control+over+state&source=gbs_navlinks_s
+% And: https://www.cs.cmu.edu/~ggordon/780-fall07/lectures/POMDP_lecture.pdf
+% http://webdocs.cs.ualberta.ca/~greiner/C-366/SLIDES/17b-POMDP.pdf
+
+\begin{center}
+<<results=tex, echo=FALSE>>=
+df <- data.frame(models=c("Markov Models", "Markov Chains", "MDP", "HMM", "POMDP"), states=c("Are States Observable?", "Yes", "Yes", "No", "No"), control=c("Control Over Transitions?", "No", "Yes", "No", "Yes"))
+colnames(df) <- as.character(t(df[1,]))
+df <- df[2:nrow(df),]
+print(xtable(df), include.colnames=TRUE, include.rownames=FALSE, size="\\small")
+@
+\end{center}
+
+}
+
+\frame{\frametitle{Markov Processes} 
+
+Markov Processes are very elementary in time series analysis.  
+
+\begin{figure}[H]
+
+\begin{center}
+\begin{tikzpicture}[]
+% states
+\node[state] (s1) at (0,2) {$s_1$};
+\node[state] (s2) at (2,2) {$s_2$}
+    edge [<-] (s1);
+\node[state] (s3) at (4,2) {$s_3$}
+    edge [<-] (s2);
+\node[state] (s4) at (6,2) {$s_4$}
+    edge [<-] (s3);
+\end{tikzpicture}
+\end{center}
+
+\end{figure}
+
+\begin{beamerboxesrounded}[shadow=true]{Definition}
+\begin{equation}
+P(s_{t+1} | s_t, ..., s_1) = P(s_{t+1} | s_t)
+\end{equation}
+
+\begin{itemize}
+\item $s_t$ is the state of the markov process at time $t$.
+\end{itemize}
+\end{beamerboxesrounded}
+
+
+}
+
+\frame{\frametitle{Markov Decision Process (MDP)} 
+
+A Markov Decision Process (MDP) adds some further structure to the problem.  
+
+% (Related to Stochastic Shortest Path problem: http://www.mit.edu/people/dimitrib/Stochasticsp.pdf)
+
+
+\begin{figure}[H]
+
+\begin{center}
+\begin{tikzpicture}[]
+% states
+\node[state] (s1) at (0,2) {$s_1$};
+\node[state] (s2) at (2,2) {$s_2$}
+    edge [<-] (s1);
+\node[state] (s3) at (4,2) {$s_3$}
+    edge [<-] (s2);
+\node[state] (s4) at (6,2) {$s_4$}
+    edge [<-] (s3);
+% actions
+\node[rectangle] (a1) at (0,0) [draw,thick,minimum width=1cm,minimum height=1cm] {$a_1$}
+    edge [->] (s2);
+\node[rectangle] (a2) at (2,0) [draw,thick,minimum width=1cm,minimum height=1cm] {$a_2$}
+    edge [->] (s3);
+\node[rectangle] (a3) at (4,0) [draw,thick,minimum width=1cm,minimum height=1cm] {$a_3$}
+    edge [->] (s4);
+% rewards
+\node[diamond] (r1) at (2,4) [draw,thick,minimum width=1cm,minimum height=1cm] {$r_1$}
+    edge [<-] (s1);
+\node[diamond] (r2) at (4,4) [draw,thick,minimum width=1cm,minimum height=1cm] {$r_2$}
+    edge [<-] (s2);
+\node[diamond] (r3) at (6,4) [draw,thick,minimum width=1cm,minimum height=1cm] {$r_3$}
+    edge [<-] (s3);
+
+\draw (a1) edge [->] (r1);
+\draw (a2) edge [->] (r2);
+\draw (a3) edge [->] (r3);
+
+\end{tikzpicture}
+\end{center}
+
+\end{figure}
+
+}
+
+
+\frame{\frametitle{Hidden Markov Model (HMM)} 
+
+Hidden Markov Models (HMM) provide a mechanism for modeling a hidden (i.e. unobserved) stochastic process by observing a related observed process.  HMM have grown increasingly popular following their success in NLP.
+
+\begin{figure}[H]
+
+\begin{center}
+\begin{tikzpicture}[]
+% states
+\node[state] (s1) at (0,2) {$s_1$};
+\node[state] (s2) at (2,2) {$s_2$}
+    edge [<-] (s1);
+\node[state] (s3) at (4,2) {$s_3$}
+    edge [<-] (s2);
+\node[state] (s4) at (6,2) {$s_4$}
+    edge [<-] (s3);
+% observations
+\node[state] (y1) at (0,0) {$o_1$}
+    edge [->] (s1);
+\node[state] (y2) at (2,0) {$o_2$}
+    edge [->] (s2);
+\node[state] (y3) at (4,0) {$o_3$}
+    edge [->] (s3);
+\node[state] (y4) at (6,0) {$o_4$}
+    edge [->] (s4);
+\end{tikzpicture}
+\end{center}
+
+\end{figure}
+
+}
+
+\frame{\frametitle{Partially Observable Markov Decision Processes (POMDP)} 
+
+A Partially Observable Markov Decision Processes (POMDP) extends the MDP by assuming partial observability of the states, where the current state is a probability model (a \emph{belief state}).  
+
+
+\begin{figure}[H]
+
+\begin{center}
+\begin{tikzpicture}[]
+% states
+\node[state] (s1) at (0,3) {$s_1$};
+\node[state] (s2) at (2,3) {$s_2$}
+    edge [<-] (s1);
+\node[state] (s3) at (4,3) {$s_3$}
+    edge [<-] (s2);
+\node[state] (s4) at (6,3) {$s_4$}
+    edge [<-] (s3);
+%
+\node[state] (o1) at (0,1.5) {$o_1$}
+    edge [->] (s1);
+\node[state] (o2) at (2,1.5) {$o_2$}
+    edge [->] (s2);
+\node[state] (o3) at (4,1.5) {$o_3$}
+    edge [->] (s3);
+\node[state] (o4) at (6,1.5) {$o_4$}
+    edge [->] (s4);
+% actions
+\node[rectangle] (a1) at (0,0) [draw,thick,minimum width=1cm,minimum height=1cm] {$a_1$}
+    edge [->] (s2);
+\node[rectangle] (a2) at (2,0) [draw,thick,minimum width=1cm,minimum height=1cm] {$a_2$}
+    edge [->] (s3);
+\node[rectangle] (a3) at (4,0) [draw,thick,minimum width=1cm,minimum height=1cm] {$a_3$}
+    edge [->] (s4);
+% rewards
+\node[diamond] (r1) at (2,4) [draw,thick,minimum width=1cm,minimum height=1cm] {$r_1$}
+    edge [<-] (s1);
+\node[diamond] (r2) at (4,4) [draw,thick,minimum width=1cm,minimum height=1cm] {$r_2$}
+    edge [<-] (s2);
+\node[diamond] (r3) at (6,4) [draw,thick,minimum width=1cm,minimum height=1cm] {$r_3$}
+    edge [<-] (s3);
+
+\draw (a1) edge [->] (r1);
+\draw (a2) edge [->] (r2);
+\draw (a3) edge [->] (r3);
+
+\end{tikzpicture}
+\end{center}
+
+\end{figure}
+
+}
+
+% 
+% \frame{\frametitle{RL Model} 
+% 
+% In a single agent version, we consider two major components: the \emph{agent} and the \emph{environment}.  The agent has a model of the world and an optimal policy based on that model.  The environment is the real world, which gives the agent some form of feedback.  We can think of the environment as being $y$ and the agent as having $f(x)$, an estimate of the true $y$.
+% 
+% \begin{figure}[H]
+% \begin{center}
+% \begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,
+%   thick,main
+%   node/.style={circle,fill=myblue,draw,text=white,font=\sffamily\Large\bfseries}]
+%  %nodes
+%  \node[] (center);
+%  % We make a dummy figure to make everything look nice.
+%  \node[top=of center, fill=myblue, text=white] (t) {Agent};
+%  \node[below=of center, fill=myblue, text=white] (g) {Environment};
+% 
+%   \path[every node/.style={font=\sffamily\small}]
+%   (t) edge[bend left=65] node[auto] {Action} (g)
+%   (g) edge[bend left=65] node[auto] {Reward, State} (t);
+% \end{tikzpicture}
+% \end{center}
+% \caption[Generalized Policy Iteration]
+%  {The reinforcement learning cycle, from agent to environment, back to agent.}
+%   \label{fig:reinforcement_cycle}
+% \end{figure}
+% 
+% }
+
+
+\frame{\frametitle{RL Model} 
+
+An MDP tranisitons from state $s$ to state $s'$
+following an action $a$, and receiving a reward $r$ as a result of each
+transition:
+
+\begin{equation}
+s_0 \xrightarrow[\qquad r_0]{a_0 \qquad} s_1 \xrightarrow[\qquad r_1]{a_1 \qquad} s_2 \ldots
+\end{equation}
+
+\begin{beamerboxesrounded}[shadow=true]{MDP Components}
+\begin{itemize}
+  \item $S$ is a set of states
+  \item $A$ is set of actions 
+  \item $R(s)$ is a reward function
+\end{itemize}
+\end{beamerboxesrounded}
+
+In addition we define:
+
+\begin{itemize}
+  \item $T(s'|s, a)$ is a probability transition function
+  \item $\gamma$ as a discount factor (from 0 to 1)
+\end{itemize}
+
+}
+
+\frame{\frametitle{Policy} 
+
+The objective is to find a policy $\pi$ that maps actions to states, and will maximize the rewards over time:
+
+{\huge
+\begin{center}
+\begin{equation*}
+\pi(s) \rightarrow a
+\end{equation*}
+\end{center}
+}
+
+% \begin{beamerboxesrounded}[shadow=true]{Policy}
+% \end{beamerboxesrounded}
+
+}
+
+\frame{\frametitle{RL Model} 
+
+% In general, we want to maximize the expected return, which can be defined as:
+% 
+% \begin{equation}
+% R(s) = r(s_0) + r_{t-2} + r_{t-3} + \cdots + r_{t-N}
+% \end{equation}
+% 
+% We want to penalize ...
+% 
+% \begin{equation}
+% R_t = r_{t-1} + \gamma r_{t-2} + \gamma^2 r_{t-3} + \cdots = \sum_{k=0}^{\infty} \gamma^k r_{t-k-1}
+% \end{equation}
+% 
+We define a \emph{value function} to maximize the expected return:
+
+\begin{equation*}
+V^{\pi}(s) = E[R(s_0) + \gamma R(s_1) + \gamma^2 R(s_2) + \cdots | s_0 = s, \pi]
+\end{equation*}
+
+We can rewrite this as a recurrence relation, which is known as the \textbf{Bellman
+Equation}:
+
+\begin{equation*}
+V^{\pi}(s) = R(s) + \gamma \sum_{s' \in S} T(s') V^{\pi}(s')
+\end{equation*}
+
+\begin{equation*}
+Q^{\pi}(s, a) = R(s) + \gamma \sum_{s' \in S} T(s') max_a Q^{\pi}(s', a')
+\end{equation*}
+
+
+}
+
+% 
+% \frame{\frametitle{Exploration vs. Exploitation} 
+% 
+% Discuss \emph{Off-policy} vs. \emph{On-policy} learning. (Q-learning vs. SARSA)
+% Assigning credit: eligibility trace 
+% SARSA($\lambda$)
+% 
+% We don't want to do table look-ups, 
+% 
+% "convergence guaranteed only for one very 
+% important special case—linear FA, learning 
+% about the policy being followed"
+% 
+% Q-learning is off-policy, which means that 
+% 
+% }
+% 
+
+\frame{\frametitle{Grid World} 
+
+http://www0.cs.ucl.ac.uk/staff/D.Silver/web/Teaching_files/intro_RL.pdf
+
+Grid world is a canonical example used in reinforcement learning.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics{../images/maze_1.png}
+\end{center}
+\end{figure}
+
+
+}
+
+\frame{\frametitle{Grid World} 
+
+Grid world is a canonical example used in reinforcement learning.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics{../images/maze_2.png}
+\end{center}
+\end{figure}
+
+
+}
+
+\frame{\frametitle{Grid World} 
+
+Grid world is a canonical example used in reinforcement learning.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics{../images/maze_3.png}
+\end{center}
+\end{figure}
+
+
+}
+
+\frame{\frametitle{Model-based vs. Model-free} 
+
+%There are two general ways of proceding:
+
+{\Large
+\begin{itemize}
+  \item Model-free: Learn a controller without learning a model. 
+  \item Model-based: Learn a model, and use it to derive a controller.
+\end{itemize}
+}
+
+}
+
+
+% Note that model-free algorithms are often referred to as direct algorithms and model-based algorithms as indirect algorithms.
+% 
+% even in the early days there were exciting model-based RL algorithms such as Moore's prioritized sweeping and Sutton's Dyna. 
+% 
+% It is difficult to directly compare the model-based and model-free reinforcement learners. Typically, model-based learners are much more efficient in terms of experience; many fewer experiences are needed to learn well. However, the model-free methods often use less computation time. If experience was cheap, a different comparison would be needed than if experience was expensive.
+% 
+% Kearns and Singh (1999) "Finite-sample convergence rates for Q-learning and indirect algorithms" showed that the two converged.
+% 
+% "building models is a key ingredient of research and progress in RL."
+% 
+% }
+
+\frame{\frametitle{Notation Comment} 
+
+I am using a fairly standard notation throughout this talk, which focuses on \emph{maximization of a utility}; an alternative version uses \emph{minimization of cost}, where the cost is the negative value of the reward:
+
+<<results=tex, echo=FALSE>>=
+df <- data.frame(Here=c("action a", "reward R", "value V", "policy $\\pi$", "discounting factor $\\gamma$", "transition probability $P_a(s,s')$"), Alternative=c("control u", "cost g", "cost-to-go J", "policy $\\mu$", "discounting factor $\\alpha$", "transition probability $p_{ss'}(a)$"))
+print(xtable(df), include.rownames=FALSE, size="\\small", sanitize.text.function=function(x){x})
+@
+
+}
+
+% 
+% \frame{\frametitle{Framework} 
+% 
+% Automated Planning: Theory and Practice, Figure V.1 "Different Dimensions of Uncertainty"
+% 
+% \begin{tikzpicture}[every node/.style={minimum size=1cm},on grid]
+% \begin{scope}[every node/.append style={yslant=-0.5},yslant=-0.5]
+%   %\shade[right color=gray!10, left color=black!50] (0,0) rectangle +(3,3);
+%   \node at (0.5,2.5) {Partial Observability};
+%   \node at (1.5,2.5) {};
+%   \node at (2.5,2.5) {};
+%   \node at (0.5,1.5) {};
+%   \node at (1.5,1.5) {No Observability};
+%   \node at (2.5,1.5) {};
+%   \node at (0.5,0.5) {};
+%   \node at (1.5,0.5) {};
+%   \node at (2.5,0.5) {Full Observability};
+%   \draw (0,0) grid (3,3);
+% \end{scope}
+% \begin{scope}[every node/.append style={yslant=0.5},yslant=0.5]
+%   %\shade[right color=gray!70,left color=gray!10] (3,-3) rectangle +(3,3);
+%   \node at (3.5,-0.5) {Deterministic};
+%   \node at (4.5,-0.5) {};
+%   \node at (5.5,-0.5) {};
+%   \node at (3.5,-1.5) {};
+%   \node at (4.5,-1.5) {Nondeterministic};
+%   \node at (5.5,-1.5) {};
+%   \node at (3.5,-2.5) {};
+%   \node at (4.5,-2.5) {};
+%   \node at (5.5,-2.5) {Probabilistic};
+%   \draw (3,-3) grid (6,0);
+% \end{scope}
+% \begin{scope}[every node/.append style={
+%     yslant=0.5,xslant=-1},yslant=0.5,xslant=-1
+%   ]
+%   %\shade[bottom color=gray!10, top color=black!80] (6,3) rectangle +(-3,-3);
+%   \node at (3.5,2.5) {};
+%   \node at (3.5,1.5) {};
+%   \node at (3.5,0.5) {Reachability Goal};
+%   \node at (4.5,2.5) {};
+%   \node at (4.5,1.5) {};
+%   \node at (4.5,0.5) {};
+%   \node at (5.5,2.5) {Extended Goal};
+%   \node at (5.5,1.5) {};
+%   \node at (5.5,0.5) {};
+%   \draw (3,0) grid (6,3);
+% \end{scope}
+% \end{tikzpicture}
+% 
+% }
+% 
+
+
+\section{Baking (methods)} 
+
+
+{
+\usebackgroundtemplate{% width=\paperwidth,
+\parbox[c][\paperheight][c]{\paperwidth}{
+\begin{figure}[H]
+\begin{center}
+%  \tikz\node[opacity=0.2] {\includegraphics[height=\paperheight, right]{../images/cartoon_4.jpg}};
+\end{center}
+\end{figure}
+}
+}
+
+
+
+\frame{
+
+\begin{center}
+{\huge How to Solve an MDP}\\
+
+\vspace{12 mm}
+
+{\Large The basics, from dynamic programming to TD($\lambda$).}
+\end{center}
+
+}
+}
+
+\frame{\frametitle{Families of Approaches} 
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics{../images/littman_families.png}
+\end{center}
+\end{figure}
+%[See "families of RL approaches in http://videolectures.net/nips09_littman_mbrl/]
+\begin{center}
+{\small
+The approaches to RL can be summarized based on what they learn (from \href{http://videolectures.net/nips09_littman_mbrl/}{Littman (2009) talk at NIP})
+}
+\end{center}
+}
+
+\frame{\frametitle{Backup Diagrams} 
+
+Backup diagrams provide a mechanism for summarizing how different methods operate by showing how information is backed up to a state.
+
+\begin{figure}
+\begin{center}
+\begin{tikzpicture}[every tree node/.style={draw,circle},
+   level distance=1.75cm,sibling distance=.5cm, 
+   edge from parent path={(\tikzparentnode) -- (\tikzchildnode)}]
+\Tree [.\node[] {$s_0$}; 
+    [.\node[ fill=black, text=white] {$a_0$}; 
+      \edge node[auto=right] {$r$};  
+      [.\node[] {$s_1$};  ] [.\node[] {$s_2$}; ]
+    ]
+    [.\node[fill=black, text=white] {$a_1$};
+      [.\node[] {$s_3$};  ] [.\node[] {$s_4$}; ]
+    ] 
+    [.\node[fill=black, text=white] {$a_2$};
+      [.\node[] {$s_5$};  ] [.\node[] {$s_6$}; ]
+    ] ]
+\end{tikzpicture}
+\end{center}
+\end{figure}
+
+}
+
+
+
+\frame{\frametitle{Dynamic Programming} 
+
+Dynamic programming is one of the widely known methods for multi-period optimization.
+
+\vspace{5mm}
+
+\begin{beamerboxesrounded}[shadow=true]{Dynamic Programming Methods}
+Dynamic programming methods require full knowledge of the environment: T (probability transition function) and R (the reward function).
+\begin{itemize}
+\item Value iteration: Bellman (1957) introduced this method, which finds the value of each state, which can then be used to compute a policy.
+\item Policy Iteration: Howard (1960) updates the value once, then finds the optimal policy, repeatedly until the policy does not change.
+\end{itemize}
+\end{beamerboxesrounded}
+
+}
+
+\frame{\frametitle{Generalized Policy Iteration} 
+
+Almost all reinforcement learning methods can be described by the general idea
+of \emph{generalized policy iteration} (GPI), which breaks the optimization into
+two processes: policy evaluation and policy improvement.  
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=1cm,
+  thick,main node/.style={circle,fill=blue!20,draw,font=\sffamily\Large\bfseries}]
+ %nodes
+ \node[] (center);
+ % We make a dummy figure to make everything look nice.
+ \node[left=of center] (t) {$\pi^*$};
+ \node[right=of center] (g) {$V^*$};
+
+  \path[every node/.style={font=\sffamily\small}]
+  (t) edge[bend left=45] node[auto] {Evaluation} (g)
+  (g) edge[bend left=45] node[auto] {Improvement} (t);
+\end{tikzpicture}
+\end{center}
+% \caption[Generalized Policy Iteration]
+%  {Diagram of Generalized Policy Iteration (GPI), showing the evaluation of a
+%  value function followed by the improvement of the policy.}
+\end{figure}
+
+
+}
+
+% \frame{\frametitle{Value Iteration} 
+% 
+% Python implementation from AIMA (http://code.google.com/p/aima-python/)
+% 
+% <<echo=FALSE, results=tex>>=
+% actions <- c("N", "S", "E", "W")
+%  
+% x <- 1:4
+% y <- 1:3
+%  
+% rewards <- matrix(rep(0, 12), nrow=3)
+% rewards[2, 2] <- NA
+% rewards[1, 4] <- 1
+% rewards[2, 4] <- -1
+%  
+% values <- rewards # initial values
+%  
+% states <- expand.grid(x=x, y=y)
+%  
+% # Transition probability
+% transition <- list("N" = c("N" = 0.8, "S" = 0, "E" = 0.1, "W" = 0.1), 
+%         "S"= c("S" = 0.8, "N" = 0, "E" = 0.1, "W" = 0.1),
+%         "E"= c("E" = 0.8, "W" = 0, "S" = 0.1, "N" = 0.1),
+%         "W"= c("W" = 0.8, "E" = 0, "S" = 0.1, "N" = 0.1))
+%  
+% # The value of an action (e.g. move north means y + 1)
+% action.values <- list("N" = c("x" = 0, "y" = 1), 
+%         "S" = c("x" = 0, "y" = -1),
+%         "E" = c("x" = -1, "y" = 0),
+%         "W" = c("x" = 1, "y" = 0))
+%  
+% # act() function serves to move the robot through states based on an action
+% act <- function(action, state) {
+%     action.value <- action.values[[action]]
+%     new.state <- state
+%     #
+%     if(state["x"] == 4 && state["y"] == 1 || (state["x"] == 4 && state["y"] == 2))
+%         return(state)
+%     #
+%     new.x = state["x"] + action.value["x"]
+%     new.y = state["y"] + action.value["y"]
+%     # Constrained by edge of grid
+%     new.state["x"] <- min(x[length(x)], max(x[1], new.x))
+%     new.state["y"] <- min(y[length(y)], max(y[1], new.y))
+%     #
+%     if(is.na(rewards[new.state["y"], new.state["x"]]))
+%         new.state <- state
+%     #
+%     return(new.state)
+% }
+%  
+% print(xtable(rewards))
+% @
+% 
+% 
+% }
+% 
+
+%\subsection{Monte Carlo}
+
+\frame{\frametitle{Monte Carlo} 
+
+\begin{columns}[T] % align columns
+\begin{column}{.6\textwidth}
+
+\begin{beamerboxesrounded}[shadow=true]{Monte Carlo Methods}
+Monte carlo methods learn from on-line, simulated experience, and require no prior knowledge of the environment's dynamics.
+\end{beamerboxesrounded}
+
+
+\end{column}%
+\hfill%
+\begin{column}{0.4\textwidth}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[height=0.95\textheight, keepaspectratio]{../images/monte_carlo_backup.png}
+\end{center}
+\end{figure}
+
+\end{column}%
+\end{columns}
+
+}
+
+
+%\subsection{Temporal Difference}
+
+\frame{\frametitle{Temporal Difference} 
+
+Temporal Difference (TD) learning was formally introduced in Sutton (1984, 1988).  Also used in Samuel (1946).  
+
+\begin{columns}[T] % align columns
+\begin{column}{.7\textwidth}
+
+\begin{beamerboxesrounded}[shadow=true]{TD(0) Updates}
+TD learning computes the temporal difference error, and adds this to the current estimate based on the learning rate $\alpha$.
+
+\begin{equation*}
+V(S_t) \leftarrow V(S_t) + \alpha [R_{t+1} + \gamma V(S_{t+1}) - V(S_t)]
+\end{equation*}
+\end{beamerboxesrounded}
+
+\end{column}%
+\hfill%
+\begin{column}{.3\textwidth}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[height=0.3\textheight, keepaspectratio]{../images/td_backup.png}
+\end{center}
+\end{figure}
+
+\end{column}%
+\end{columns}
+
+
+}
+
+
+\frame{\frametitle{Q-Learning} 
+
+Q-learning (Watkins 1989) is a model-free method, and is one of the most important methods in reinforcement learning as it was one of the first to show convergence.  Rather than learning the optimal value function, Q-learning learns the Q function.
+
+\begin{equation*}
+Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha [R_{t+1} + \gamma max_a Q(S_{t+1}, a) - Q(S_t, A_t)]
+\end{equation*}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[height=0.3\textheight, keepaspectratio]{../images/pseudo_qlearning.png}
+\end{center}
+\end{figure}
+
+}
+
+
+\frame{\frametitle{SARSA} 
+
+SARSA (Rummery and Niranjan 1994, who called it modified Q-learning) is an on-policy temporal difference learning method.
+
+\begin{equation*}
+Q(S_t, A_t) \leftarrow Q(S_t, A_t) + \alpha [R_{t+1} + \gamma Q(S_{t+1}, a) - Q(S_t, A_t)]
+\end{equation*}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[height=0.3\textheight, keepaspectratio]{../images/pseudo_sarsa.png}
+\end{center}
+\end{figure}
+
+}
+
+
+
+
+%\subsection{Eligibility Traces}
+
+\frame{\frametitle{Eligibility Traces} 
+
+\emph{Eligibility Traces} provide a mechanism for assigning credit more quickly.
+
+\begin{figure}[H]
+    %\caption{My caption}
+\begin{center}
+\includegraphics{../images/eligibility_traces.png}
+% \caption{The space of RL methods (from \href{http://incompleteideas.net/sutton/papers/maei-thesis-2011.pdf}{Maei (2011) "Gradient Temporal-Difference Learning Algorithms"})}
+\end{center}
+\end{figure}
+
+
+}
+
+\frame{\frametitle{Eligibility Traces} 
+
+\emph{Eligibility Traces} provide a mechanism for assigning credit more quickly, and can improve learning.
+
+\begin{figure}[H]
+    %\caption{My caption}
+\begin{center}
+\includegraphics{../images/elligibility_traces_lambda.png}
+% \caption{The space of RL methods (from \href{http://incompleteideas.net/sutton/papers/maei-thesis-2011.pdf}{Maei (2011) "Gradient Temporal-Difference Learning Algorithms"})}
+\end{center}
+\end{figure}
+
+
+}
+
+
+
+\frame{\frametitle{Methods, the Unified View} 
+
+\begin{figure}[!h]
+    %\caption{My caption}
+\begin{center}
+\includegraphics[width=0.9\paperwidth, keepaspectratio]{../images/RL_methods_space.png}
+\end{center}
+\end{figure}
+
+{\small The space of RL methods (from \href{http://incompleteideas.net/sutton/papers/maei-thesis-2011.pdf}{Maei (2011) "Gradient Temporal-Difference Learning Algorithms"})}
+
+}
+
+
+\section{Eat your own pi (code)} 
+
+
+{
+\usebackgroundtemplate{% width=\paperwidth,
+\parbox[c][\paperheight][c]{\paperwidth}{
+\begin{figure}[H]
+\begin{center}
+%  \tikz\node[opacity=0.2] {\includegraphics[height=\paperheight, right]{../images/cartoon_4.jpg}};
+\end{center}
+\end{figure}
+}
+}
+
+
+
+\frame{
+
+\begin{center}
+{\huge From Theory to Practice}\\
+
+\vspace{12 mm}
+
+{\Large A tour of reinforcement learning software.}
+\end{center}
+
+}
+}
+
+
+\frame{\frametitle{The State of Open Source RL} 
+
+There are a number of projects that provide RL algorithms:
+
+\begin{itemize}
+  \item RL-Glue/RL-Library (Multi-Language)
+  \item RLPark (Java)
+  \item PyBrain (Python)
+  \item \href{http://acl.mit.edu/RLPy/index.html}{RLPy} (Python)
+  \item \href{http://incompleteideas.net/rlai.cs.ualberta.ca/RLAI/RLtoolkit/RLtoolkit1.0.html}{RLToolkit} (Python, \href{http://cdann.de/pub/mlossws13geramifard.pdf}{paper})
+  \item \href{http://www.igi.tu-graz.ac.at/gerhard/ril-toolbox/general/overview.html}{RL Toolbox} (C++) (\href{http://www.igi.tu-graz.ac.at/gerhard/ril-toolbox/thesis/DiplomArbeit.pdf}{Master's Thesis})
+\end{itemize}
+
+}
+
+\frame{\frametitle{RL-Glue} 
+
+RL-Glue is a fundamental library for the RL community.
+
+\begin{figure}[!h]
+    %\caption{My caption}
+\begin{center}
+\includegraphics{../images/RLGlue.png}
+\caption{RL-Glue standard}
+\end{center}
+\end{figure}
+
+}
+
+\frame{\frametitle{RL-Glue: Codecs} 
+
+RL-Glue currently offers codecs for multiple languages (see \href{https://code.google.com/p/rl-glue-ext/}{RL-Glue Extensions}):
+
+\begin{itemize}
+  \item C/C++
+  \item Lisp
+  \item Java
+  \item Matlab
+  \item Python
+\end{itemize}
+
+We recently created the \emph{rlglue} R package: 
+
+\begin{semiverbatim}
+library(devtools);
+install\_github("smc77/rlglue")
+\end{semiverbatim}
+
+}
+
+\frame{\frametitle{RL R Package} 
+
+The RL package in R is intended for three things:
+
+\begin{itemize}
+  \item \textbf{Clear} RL algorithms for education
+  \item \textbf{Generic}, reusable models that can be applied to any dataset
+  \item Sophisticated, cutting edge methods
+\end{itemize}
+
+
+It also includes features such as ensemble methods.
+
+}
+
+
+\frame{\frametitle{RL R Package (Roadmap)} 
+
+\begin{itemize}
+  \item On-policy prediction: TD($\lambda$)
+  \item Off-policy prediction: GTD($\lambda$), GQ($\lambda$)
+  \item On-policy control: Q($\lambda$)
+  \item Off-policy control: SARSA($\lambda$)
+  \item Acting: softmax, greedy, $\epsilon$-greedy
+\end{itemize}
+
+}
+
+\frame{\frametitle{Approach} 
+
+The RL package in R follows a basic routine:
+
+\begin{enumerate}
+  \item Define an \emph{agent}
+  \begin{itemize}
+    \item Specify a model (e.g. MDP, POMDP)
+    \item Choose a learning method (e.g. Value iteration, Q-Learning)
+    \item Choose a planning method (e.g. $\epsilon$-greedy, UCB, bayesian)
+  \end{itemize}
+  \item Define an environment (a dataset or simulator, terminal state)
+  \item Run an experiment (number of episodes, specify $\epsilon$)
+\end{enumerate}
+
+The result of running a simulation is an RLModel object, which can hold several different utilities, including the optimal policy.
+
+The package also includes a number of examples (grid world, pole balancing).
+
+}
+
+% \frame{\frametitle{Model} 
+% 
+% A model provides structure
+% 
+% }
+% 
+% \frame{\frametitle{Method} 
+% 
+% Currently supports value iteration, policy iteration, SARSA, and Q-Learning.
+% 
+% }
+% 
+% 
+
+\frame{\frametitle{Simulation} 
+
+Similar to RLinterface in RLToolkit.
+
+Methods:
+
+step, steps, episode, episodes
+
+}
+
+% 
+% \section{Pi for foodies (the cutting edge)} 
+% 
+% 
+% 
+% \frame{\frametitle{Function Approximation} 
+% 
+% http://artint.info/html/ArtInt_272.html
+% 
+% Number of states in Go, Tetris, ...
+% 
+% Go has $10^35$ states
+% 
+% http://www0.cs.ucl.ac.uk/staff/D.Silver/web/Publications_files/tdsearch.pdf
+% 
+% So we want to replace the table lookup method with a model of the value.
+% 
+% }
+% 
+% \frame{\frametitle{PAC-MDP, Rmax, $E^3$, KWIK, BOSS} 
+% 
+% There have been significant advances in increasing convergence.  
+% 
+% Traditional methods guarantee convergence in the limit, but who can wait for infinite time in reality?  Even worse, some examples \emph{diverge} over time.
+% 
+% These methods often follow the notion of "optimistic under uncertainty", which is to say that they value finding unknown states.
+% 
+% \begin{itemize}
+%   \item RMAX (Brafman & Tennenholtz, 2002) distinguishes “known” and “unknown” states based on how often they have been visited. It explores by acting to maximize reward under the assumption that unknown states deliver maximum reward. (Quoted in BOSS paper, p.1)
+%   \item Best of Sampled Set (BOSS): http://web.mit.edu/~wingated/www/papers/boss.pdf
+% \end{itemize}
+% 
+% 
+% }
+% 
+% \frame{\frametitle{Bayesian Reinforcement Learning} 
+% 
+% 
+% 
+% }
+% 
+% \frame{\frametitle{Inverse Reinforcement Learning} 
+% 
+% Inverse Reinforcement Learning was 
+% 
+% Related to "Inverse Optimal Control" (IOC)
+% 
+% }
+% 
+% \frame{\frametitle{Game Theory and Multi-agent Reinforcement Learning} 
+% 
+% https://sites.google.com/site/aamas2013marltutorial/slides
+% %https://dl.dropboxusercontent.com/u/1535439/MARL%20tutorial%20AAMAS%202013/Fundamentals%20of%20MARL.pdf
+% http://busoniu.net/files/papers/smcc08.pdf
+% 
+% }
+% 
+% 
+% \frame{\frametitle{Hierarchical Reinforcement Learning} 
+% 
+% https://www.jair.org/media/639/live-639-1834-jair.pdf (introduces the "taxi problem")
+% 
+% 
+% }
+% 
+% \frame{\frametitle{Continuous Time MDP (HJB Equation)} 
+% 
+% A continous time can be discretized and solved using the methods above, or considered with continuous dynamics defined by PDE's.  
+% 
+% Now we want to solve a continuous value function:
+% 
+% \begin{equation}
+% max \quad \mathbb{E}_u[\int_0^{\infty}\gamma^t r(x(t),u(t)))dt|x_0]
+% \end{equation}
+% 
+% }
+% 
+% \frame{\frametitle{Off-Policy} 
+% 
+% http://people.cs.umass.edu/~mahadeva/papers/NIPS%202012.pdf
+% 
+% A new Q($\lambda$) with interim forward view and Monte Carlo equivalence
+% http://webdocs.cs.ualberta.ca/~sutton/papers/SMPvH-ICML-2014.pdf
+% 
+% GQ (http://webdocs.cs.ualberta.ca/~sutton/papers/maei-sutton-10.pdf)
+% Greedy-GQ($\lambda$)
+% GVF
+% Gradient Temporal Difference
+% GTD($\lambda$)
+% http://arxiv.org/pdf/1205.4839.pdf
+% 
+% "Scaling Life-long Off-policy Learning"
+% http://ewrl.files.wordpress.com/2011/12/ewrl_rtbd.pdf
+% 
+% http://videolectures.net/icml09_sutton_fgdm/
+% Fast Gradient-Descent Methods for Temporal-Difference Learning with Linear Function Approximation
+% 
+% }
+% 
+% \frame{\frametitle{Others} 
+% 
+% https://sites.google.com/site/decisionmakingbigdata/
+% Actor-Critic
+% Intrinsic rewards/motivation
+% Transfer
+% Learning skills
+% 
+% }
+% 
+
+
+\section{I ate the whole pi, but I'm still hungry! (references)} 
+
+\frame{\frametitle{Try this at home!} 
+
+All the source code from this talk is available at: https://github.com/smc77/rl
+
+\vspace{5mm}
+
+Other open source software:
+
+\begin{itemize}
+  \item \href{http://glue.rl-community.org/wiki/Main_Page}{RL-Glue/RL-Library} (Multi-Language)
+  \item \href{http://rlpark.github.io/}{RLPark} (Java)
+  \item \href{http://pybrain.org/}{PyBrain} (Python)
+  \item \href{http://acl.mit.edu/RLPy/index.html}{RLPy} (Python)
+  \item \href{http://incompleteideas.net/rlai.cs.ualberta.ca/RLAI/RLtoolkit/RLtoolkit1.0.html}{RLToolkit} (Python, \href{http://cdann.de/pub/mlossws13geramifard.pdf}{paper})
+  \item \href{http://www.igi.tu-graz.ac.at/gerhard/ril-toolbox/general/overview.html}{RL Toolbox} (C++) (\href{http://www.igi.tu-graz.ac.at/gerhard/ril-toolbox/thesis/DiplomArbeit.pdf}{Master's Thesis})
+\end{itemize}
+
+
+}
+
+\frame{\frametitle{Community} 
+
+\begin{itemize}
+  \item https://groups.google.com/forum/#!forum/rl-list
+  \item glue.rl-community.org/
+  \item http://www.rl-competition.org/
+\end{itemize}
+
+}
+
+\frame{\frametitle{Papers} 
+
+Surveys:
+
+\begin{itemize}
+  \item \href{http://www.cs.cmu.edu/afs/cs/project/jair/pub/volume4/kaelbling96a.pdf}{Kaelbling, Littman, and Moore (1996) "Reinforcement Learning: A Survey"}
+  \item \href{http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.17.4565&rep=rep1&type=pdf}{Littman (1996) "Algorithms for Sequential Decision Making"} 
+  \item \href{http://www.ri.cmu.edu/pub_files/2013/7/Kober_IJRR_2013.pdf}{Kober, Bagnell, and Peters (2013) "Reinforcement Learning in Robotics: A Survey"}
+\end{itemize}
+
+% http://web.mst.edu/~gosavia/joc.pdf
+% http://web.mst.edu/~gosavia/tutorial.pdf
+% http://webdocs.cs.ualberta.ca/~vanhasse/papers/Insights_in_Reinforcement_Learning_Hado_van_Hasselt.pdf
+
+}
+
+\frame{\frametitle{Books (AI/ML/Robotics/Planning)} 
+
+These are general textbooks that provide a good overview of reinforcement learning.
+
+\begin{itemize}
+  \item Russell and Norvig (2010) "Artifical Intelligence: A Modern Approach"
+  \item Ghallab, Nau, and Traverso "Automated Planning: Theory & Practice"
+  \item Thurn "Probabilistic Robotics"
+  \item Poole and Mackworth (2010) \href{http://www.cs.ubc.ca/~poole/aibook/}{"Artificial Intelligence: Foundations of Computational Agents"}
+  \item Mitchell (1997) "Machine Learning"
+  \item Marsland (2009) "Machine Learning: An Algorithmic Perspective"
+\end{itemize}
+
+
+}
+
+\frame{\frametitle{Books (RL)} 
+
+\begin{columns}[T] % align columns
+\begin{column}{.48\textwidth}
+
+\begin{center}
+\includegraphics[height=0.4\textheight, keepaspectratio]{../images/suttonbarto.jpg}
+\end{center}
+{\small
+Sutton and Barto (1998) "Reinforcement Learning: An Introduction"
+}
+\end{column}%
+\hfill%
+\begin{column}{.48\textwidth}
+\begin{center}
+\includegraphics[height=0.45\textheight, keepaspectratio]{../images/neurodynamic_programming.jpg}
+\end{center}
+
+{\small
+Bertsekas and Tsitsiklis (1996) "Neuro-Dynamic Programming"
+}
+
+\end{column}%
+\end{columns}
+
+\begin{itemize}
+ \item "Reinforcement Learning: State-of-the-Art"
+ \item Csaba Szepesvari
+ (2009) \href{http://www.ualberta.ca/~szepesva/papers/RLAlgsInMDPs.pdf}{"Algorithms for Reinforcement Learning"}
+\end{itemize}
+
+}
+
+\frame{\frametitle{People} 
+
+{\small 
+\begin{itemize}
+  \item \textbf{Richard Sutton} (Alberta) - http://webdocs.cs.ualberta.ca/~sutton/
+  \item Andrew Barto (UMass) - http://www-anw.cs.umass.edu/~barto/
+  \item Michael Littman (Brown) - http://cs.brown.edu/~mlittman/
+  \item Benjamin Van Roy (Stanford) - http://web.stanford.edu/~bvr/
+  \item Leslie Kaelbling (MIT) - http://people.csail.mit.edu/lpk/
+  \item Emma Brunskill (CMU) - http://www.cs.cmu.edu/~ebrun/ %(phd: http://www.cs.cmu.edu/~ebrun/brunskillPhD.pdf)
+  \item Dimitri Bertsekas (MIT) - http://www.mit.edu/~dimitrib/home.html
+  \item Csaba Szepesvári - http://www.ualberta.ca/~szepesva/
+  \item Chris Watkins - http://www.cs.rhul.ac.uk/home/chrisw/
+  \item Lihong Li (Microsoft) - http://www.research.rutgers.edu/~lihong/
+  \item John Langford (Microsoft) - http://hunch.net/~jl/
+  \item Hado von Hasselt - http://webdocs.cs.ualberta.ca/~vanhasse/
+\end{itemize}
+
+}
+
+}
+
+% \frame{\frametitle{Alternatives to RL} 
+% 
+% Other planning methods:
+% 
+% \begin{itemize}
+%   \item Search-based: 
+% \end{itemize}
+% 
+% http://www.ri.cmu.edu/pub_files/2012/2/icra2011-rp.pdf
+% 
+% }
+
+\frame{
+
+\begin{figure}[!h]
+    %\caption{My caption}
+\begin{center}
+\includegraphics[height=0.8\paperheight, keepaspectratio]{../images/cartoon6597.png}
+\end{center}
+\end{figure}
+
+\begin{center}
+{\huge Questions?}
+\end{center}
+
+}
+
+\note{
+\begin{itemize}
+\item I'm just starting with this cartoon because it's highlights some aspects of reinforcement learning while also being misleading on others.  In particular, the cartoon suggests simply that repeated exposure to something will lead to a mental model.  This is almost more akin to the kind of learning that takes place within a neural network.  Reinforcement learning typically includes two related things (a) a goal and (b) rewards.
+\end{itemize}
+}
+
+
+\end{document}
+
