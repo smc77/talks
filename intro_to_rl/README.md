@@ -12,6 +12,8 @@ The outline of the talk:
 * Open source code
 * References
 
+The talk was filmed by Hakka Labs: https://www.youtube.com/watch?v=xa6AHMoND6E
+
 Note: This talk is somewhat dated at this stage.  The open source code, in particular, was very poor a few years ago, but now we have https://www.openai.com/ which provides a suite of amazing tools.
 
 This is released under a creative commons license: https://creativecommons.org/licenses/by-nc-sa/3.0/us/
