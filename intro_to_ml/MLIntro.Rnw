@@ -754,10 +754,10 @@ The most popular method for regression is OLS, commonly solved using the matrix 
 
 <<fig=FALSE, echo=FALSE, eval=FALSE>>=
 p <- ggplot(data=iris, aes(x=Petal.Length, y=Petal.Width)) + geom_point() + geom_smooth(method='lm')
-ggsave("ols1.png", p, width=4, height=4)
+ggsave("figures/ols1.png", p, width=4, height=4)
 
 p2 <- ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width)) + geom_point() + geom_smooth(method='lm')
-ggsave("ols2.png", p2, width=4, height=4)
+ggsave("figures/ols2.png", p2, width=4, height=4)
 @
 
 This shows that there is a strong linear relationship between petal dimensions, but not between sepal dimensions in the iris dataset.
@@ -766,11 +766,11 @@ This shows that there is a strong linear relationship between petal dimensions, 
 \centering
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.9\textwidth]{ols1.png}
+  \includegraphics[width=0.9\textwidth]{figures/ols1.png}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.9\textwidth]{ols2.png}
+  \includegraphics[width=0.9\textwidth]{figures/ols2.png}
 \end{minipage}
 \end{figure}
 
@@ -818,12 +818,12 @@ dev.off()
 f <- ggplot(data.frame(x = x), aes(x))
 f <- f + stat_function(fun = function(x) sin(2 * pi * x), colour = "green")
 f <- f + geom_point(data=data.frame(x, y), aes(x=x, y=y))
-ggsave("poly1.png", f, width=8, height=4)
+ggsave("figures/poly1.png", f, width=8, height=4)
 @
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{poly1.png}
+\includegraphics[width=0.9\textwidth]{figures/poly1.png}
 \end{center}
 %\caption{Increasing the model complexity can improve performance (lower bias), but eventually will cause over-fitting (higher variance.}
 \end{figure}
@@ -842,7 +842,7 @@ Without knowing the real function, we can estimate it by fitting polynomials:
 
 <<fig=TRUE, echo=FALSE, eval=FALSE>>=
 
-png("poly2.png", width=8, height=4, units="in", res=300)
+png("figures/poly2.png", width=8, height=4, units="in", res=300)
 
 par(mfrow=c(2, 2), mar=c(1,1,1,1))
 
@@ -867,14 +867,14 @@ p6 <- f + stat_smooth(aes(x, y), method="lm", se=TRUE, fill=NA,
 p9 <- f + stat_smooth(aes(x, y), method="lm", se=TRUE, fill=NA,
                 formula=y ~ poly(x, 9, raw=TRUE),colour="red") 
 
-ggsave("p1.png", p1, width=6, height = 3)
-ggsave("p3.png", p3, width=6, height = 3)
-ggsave("p6.png", p6, width=6, height = 3)
-ggsave("p9.png", p9, width=6, height = 3)
+ggsave("figures/p1.png", p1, width=6, height = 3)
+ggsave("figures/p3.png", p3, width=6, height = 3)
+ggsave("figures/p6.png", p6, width=6, height = 3)
+ggsave("figures/p9.png", p9, width=6, height = 3)
 @
 
 % \begin{center}
-% \includegraphics[width=0.9\textwidth]{poly2.png}
+% \includegraphics[width=0.9\textwidth]{figures/poly2.png}
 % \end{center}
 % %\caption{Increasing the model complexity can improve performance (lower bias), but eventually will cause over-fitting (higher variance.}
 
@@ -883,12 +883,12 @@ ggsave("p9.png", p9, width=6, height = 3)
 \begin{columns}[t]
 \column{.5\textwidth}
 \centering
-\includegraphics[width=5cm]{p1.png}\ %\pause   
-\includegraphics[width=5cm]{p3.png} %\pause
+\includegraphics[width=5cm]{figures/p1.png}\ %\pause   
+\includegraphics[width=5cm]{figures/p3.png} %\pause
 \column{.5\textwidth}
 \centering
-\includegraphics[width=5cm]{p6.png}\  %\pause
-\includegraphics[width=5cm]{p9.png} 
+\includegraphics[width=5cm]{figures/p6.png}\  %\pause
+\includegraphics[width=5cm]{figures/p9.png} 
 \end{columns}
 
 \end{figure}
@@ -962,12 +962,12 @@ errors <- melt(errors, "polynomial")
 colnames(errors) <- c("polynomial", "dataset", "error")
 
 p <- ggplot(errors, aes(x=polynomial, y=error, group=dataset, colour=dataset)) + geom_line()
-ggsave("loss_curve1.png", p, width=8, height=4)
+ggsave("figures/loss_curve1.png", p, width=8, height=4)
 @
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{loss_curve1.png}
+\includegraphics[width=0.9\textwidth]{figures/loss_curve1.png}
 \end{center}
 %\caption{Increasing the model complexity can improve performance (lower bias), but eventually will cause over-fitting (higher variance.}
 \end{figure}
@@ -981,7 +981,7 @@ One "simple" way to solve for overfitting is by getting more data, which is one 
 
 <<fig=TRUE, echo=FALSE, eval=FALSE>>=
 
-png("poly3.png", width=8, height=6, units="in", res=300)
+png("figures/poly3.png", width=8, height=6, units="in", res=300)
 
 # Adding more data:
 par(mfrow=c(2, 2), mar=c(1,1,1,1))
@@ -1010,7 +1010,7 @@ for (i in c(10, 50, 100, 1000)) {
   p_i <- f + stat_smooth(aes(x, y), method="lm", se=TRUE, fill=NA,
                   formula=y ~ poly(x, 9, raw=TRUE),colour="red")
 
-  ggsave(paste("p", i, ".png", sep=""), p_i, width=6, height = 3)
+  ggsave(paste("figures/p", i, ".png", sep=""), p_i, width=6, height = 3)
 }
 
 @
@@ -1020,12 +1020,12 @@ for (i in c(10, 50, 100, 1000)) {
 \begin{columns}[t]
 \column{.5\textwidth}
 \centering
-\includegraphics[width=5cm]{p10.png}\ %\pause   
-\includegraphics[width=5cm]{p50.png} %\pause
+\includegraphics[width=5cm]{figures/p10.png}\ %\pause   
+\includegraphics[width=5cm]{figures/p50.png} %\pause
 \column{.5\textwidth}
 \centering
-\includegraphics[width=5cm]{p100.png}\    %\pause
-\includegraphics[width=5cm]{p1000.png} 
+\includegraphics[width=5cm]{figures/p100.png}\    %\pause
+\includegraphics[width=5cm]{figures/p1000.png} 
 \end{columns}
 
 \end{figure}
@@ -1034,7 +1034,7 @@ for (i in c(10, 50, 100, 1000)) {
 
 % \begin{figure}[!h]
 % \begin{center}
-% \includegraphics[width=0.9\textwidth]{poly3.png}
+% \includegraphics[width=0.9\textwidth]{figures/poly3.png}
 % \end{center}
 % %\caption{Increasing the model complexity can improve performance (lower bias), but eventually will cause over-fitting (higher variance.}
 % \end{figure}
@@ -1084,7 +1084,7 @@ x=model.matrix(Salary~.-1,data=Hitters)
 y=Hitters$Salary
 
 fit.ridge=glmnet(x,y,alpha=0)
-png("fit_ridge.png", width=4, height=4, units="in", res=300)
+png("figures/fit_ridge.png", width=4, height=4, units="in", res=300)
 plot(fit.ridge,xvar="lambda",label=TRUE)
 dev.off()
 
@@ -1095,10 +1095,10 @@ ridge_coef = data.frame(Origin      = rownames(mat)[summ$i],
            Lambda = log(fit.ridge$lambda[summ$j]),
            Coefficient      = summ$x)
 p <- ggplot(ridge_coef[ridge_coef$Lambda < 10,], aes(x=Lambda, y=Coefficient, group=Origin, color=Origin)) + geom_line()
-ggsave("ridge_coef.png", p)
+ggsave("figures/ridge_coef.png", p)
 
 fit.lasso=glmnet(x,y,alpha=1)
-png("fit_lasso.png", width=4, height=4, units="in", res=300)
+png("figures/fit_lasso.png", width=4, height=4, units="in", res=300)
 plot(fit.lasso,xvar="lambda",label=TRUE)
 dev.off()
 
@@ -1109,18 +1109,18 @@ lasso_coef = data.frame(Origin      = rownames(mat)[summ$i],
            Lambda = log(fit.lasso$lambda[summ$j]),
            Coefficient      = summ$x)
 p <- ggplot(lasso_coef, aes(x=Lambda, y=Coefficient, group=Origin, color=Origin)) + geom_line()
-ggsave("lasso_coef.png")
+ggsave("figures/lasso_coef.png")
 @
 
 \begin{figure}[h!]
 \centering
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.9\textwidth]{ridge_coef.png}
+  \includegraphics[width=0.9\textwidth]{figures/ridge_coef.png}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.9\textwidth]{lasso_coef.png}
+  \includegraphics[width=0.9\textwidth]{figures/lasso_coef.png}
 \end{minipage}
 \caption{\small{Path for coefficients as lambda is increased in (a) ridge and (b) lasso.  Data predicting salaries for MLB players from 1986/87 from Games/Witten/Hastie/Tibshirani (2013).}}
 \end{figure}
@@ -1277,12 +1277,12 @@ p <- ggplot(class_data, aes(x,y, color=class)) +
     geom_point(size=3) +
     geom_abline(intercept=2, slope=-0.5) +
     geom_abline(intercept=2.3, slope=-0.9) + geom_abline(intercept=1.4, slope=-0.3) +                   geom_abline(intercept=2.3, slope=-0.8) + geom_abline(intercept=2.1, slope=-0.7)
-ggsave("random_fit.png", p, width=8, height=4)
+ggsave("figures/random_fit.png", p, width=8, height=4)
 @
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{random_fit.png}
+\includegraphics[width=0.9\textwidth]{figures/random_fit.png}
 \end{center}
 \caption{Taking two classes of data, we can separate them using many different lines.  Classifiers will try to minimize a particular \emph{loss function}.}
 \end{figure}
@@ -1306,14 +1306,14 @@ iris[, "Setosa"] = as.integer(iris$Species == 'setosa')
 p <- ggplot(iris, aes(x=Sepal.Length, y=Setosa)) + geom_point() + 
   stat_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
 #print(p)
-ggsave("logistic_regression_ggplot.png", p, width=8, height=4)
+ggsave("figures/logistic_regression_ggplot.png", p, width=8, height=4)
 @
 
 
 \begin{figure}[h!]
 \begin{center}
-%\includegraphics[width=0.8\textwidth]{logistic_regression.png}
-\includegraphics[width=0.8\textwidth]{logistic_regression_ggplot.png}
+%\includegraphics[width=0.8\textwidth]{figures/logistic_regression.png}
+\includegraphics[width=0.8\textwidth]{figures/logistic_regression_ggplot.png}
 \end{center}
 \end{figure}
 
@@ -1443,8 +1443,8 @@ plot.knn <- function(k=1) {
 }
 p1 <- plot.knn(1)
 p3 <- plot.knn(3)
-ggsave("knn1.png", p1, width=4, height = 4)
-ggsave("knn3.png", p3, width=4, height = 4)
+ggsave("figures/knn1.png", p1, width=4, height = 4)
+ggsave("figures/knn3.png", p3, width=4, height = 4)
 @
 
 <<echo=FALSE, eval=FALSE>>=
@@ -1459,7 +1459,7 @@ prob <- ifelse(mod15=="1", prob, 1-prob)
 px1 <- mixture.example$px1
 px2 <- mixture.example$px2
 prob15 <- matrix(prob, length(px1), length(px2))
-png("myplot.png", width=4, height=4, units="in", res=300)
+png("figures/myplot.png", width=4, height=4, units="in", res=300)
 par(mar=rep(2,4))
 contour(px1, px2, prob15, levels=0.5, labels="", xlab="", ylab="", main=
         "15-nearest neighbour", axes=FALSE)
@@ -1474,18 +1474,18 @@ dev.off()
 \centering
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.95\textwidth]{knn1.png}
+  \includegraphics[width=0.95\textwidth]{figures/knn1.png}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.95\textwidth]{knn3.png}
+  \includegraphics[width=0.95\textwidth]{figures/knn3.png}
 \end{minipage}
 \caption{\small{K nearest neighbors to classify the Iris dataset with (a) k = 1 and (b) k = 3.}}
 \end{figure}
 
 % \begin{figure}[h!]
 % \begin{center}
-% \includegraphics[width=0.8\textwidth]{myplot.png}
+% \includegraphics[width=0.8\textwidth]{figures/myplot.png}
 % \end{center}
 % \end{figure}
 
@@ -1531,14 +1531,14 @@ p <- ggplot(class_data,aes(x, y, color=class)) +
     geom_abline(intercept=(b+1)/w[1], slope=-w[2]/w[1], linetype=2)+ 
     geom_abline(intercept=(b-1)/w[1], slope=-w[2]/w[1], linetype=2)
 
-ggsave("svm_boundary.png", p)
+ggsave("figures/svm_boundary.png", p)
 
 @
 
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.95\textwidth]{svm_boundary.png}
+\includegraphics[width=0.95\textwidth]{figures/svm_boundary.png}
 \end{center}
 \caption{Support vector machine with decision boundaries.}
 \end{figure}
@@ -1551,7 +1551,7 @@ ggsave("svm_boundary.png", p)
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[height=0.55\textheight]{kernel_trick.png}
+\includegraphics[height=0.55\textheight]{figures/kernel_trick.png}
 \end{center}
 \caption{Kernels transform data into higher dimensions to allow linear decision boundaries.}
 \end{figure}
@@ -1564,7 +1564,7 @@ ggsave("svm_boundary.png", p)
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[height=0.55\textheight]{kernel_trick_3d.png}
+\includegraphics[height=0.55\textheight]{figures/kernel_trick_3d.png}
 \end{center}
 \caption{Kernels transform data into higher dimensions to allow linear decision boundaries, example in 3-dimensions.}
 \end{figure}
@@ -1577,7 +1577,7 @@ ggsave("svm_boundary.png", p)
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.55\textwidth]{simple_perceptron.png}
+\includegraphics[width=0.55\textwidth]{figures/simple_perceptron.png}
 \end{center}
 \caption{A perceptron takes inputs, applies weights, and determines the output based on an activation function (such as a sigmoid).}
 \end{figure}
@@ -1597,7 +1597,7 @@ ggsave("svm_boundary.png", p)
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.8\textwidth]{neural_net2.jpeg}
+\includegraphics[width=0.8\textwidth]{figures/neural_net2.jpeg}
 \end{center}
 \caption{Multiple layers can be connected together.}
 \end{figure}
@@ -1639,7 +1639,7 @@ p <- ggplot(data) + geom_point(aes(x=x, y=y, color = as.character(label)), size 
   coord_fixed(ratio = 0.8) +
   theme(axis.ticks=element_blank(), panel.grid.major = element_blank(), #panel.grid.minor = element_blank(), 
         axis.text=element_blank(), axis.title=element_blank(), legend.position = 'none')
-ggsave("spiral.png", p, width=4, height=4)
+ggsave("figures/spiral.png", p, width=4, height=4)
 @
 
 <<eval=FALSE, echo=FALSE>>=
@@ -1752,7 +1752,7 @@ p2 <- ggplot()+
   theme(axis.ticks=element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
         axis.text=element_blank(), axis.title=element_blank(), legend.position = 'none')
 
-ggsave("spiral2.png", p2, width=4, height = 4)
+ggsave("figures/spiral2.png", p2, width=4, height = 4)
 
 @
 
@@ -1762,11 +1762,11 @@ Multi-layer neural networks can fit complex functions:
 \centering
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.9\textwidth]{spiral.png}
+  \includegraphics[width=0.9\textwidth]{figures/spiral.png}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.9\textwidth]{spiral2.png}
+  \includegraphics[width=0.9\textwidth]{figures/spiral2.png}
 \end{minipage}
 \caption{Spiral dataset with 4 different classes.  The shaded region represents the neural network's predictions.}
 \end{figure}
@@ -1783,7 +1783,7 @@ Multi-layer neural networks can fit complex functions:
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.8\textwidth]{dt.png}
+\includegraphics[width=0.8\textwidth]{figures/dt.png}
 \end{center}
 %\caption{Titanic data from Kaggle competition shows a pattern predicting who survived: more likely to be female, wealthy, and/or young.  Can we model this?}
 \end{figure}
@@ -1801,12 +1801,12 @@ posn.j <- position_jitter(0.5, 0)
 p <- ggplot(titanic,aes(x=factor(pclass),y=age,col=factor(sex)))+
   geom_jitter(size=3,alpha=0.5)+#,position=posn.j)+
   facet_grid(". ~ survived")
-ggsave("titanic_scatter.png", p, width=8, height=4)
+ggsave("figures/titanic_scatter.png", p, width=8, height=4)
 @
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.8\textwidth]{titanic_scatter.png}
+\includegraphics[width=0.8\textwidth]{figures/titanic_scatter.png}
 \end{center}
 \caption{Titanic data from Kaggle competition shows a pattern predicting who survived: more likely to be female, wealthy, and/or young.  Can we model this?}
 \end{figure}
@@ -1819,7 +1819,7 @@ ggsave("titanic_scatter.png", p, width=8, height=4)
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.6\textwidth]{CART_tree_titanic_survivors.png}
+\includegraphics[width=0.6\textwidth]{figures/CART_tree_titanic_survivors.png}
 \end{center}
 \caption{A decision tree that predicts who survived the Titanic, constructed using CART.}
 \end{figure}
@@ -1914,7 +1914,7 @@ Examples of models:
 <<fig=TRUE, echo=FALSE, eval=FALSE>>=
 library(ggplot2)
 p <- (ggplot(iris, aes(Petal.Length, Petal.Width, color = Species)) + geom_point())
-ggsave("iris_cluster1.png", p, width=4, height =4)
+ggsave("figures/iris_cluster1.png", p, width=4, height =4)
 
 set.seed(20)
 irisCluster <- kmeans(iris[, 3:4], 3, nstart = 20)
@@ -1923,7 +1923,7 @@ irisCluster$cluster <- as.factor(irisCluster$cluster)
 iris[,"Cluster"] <- irisCluster$cluster
 p2 <- ggplot(iris, aes(Petal.Length, Petal.Width, color = Cluster)) + geom_point(aes(Petal.Length, Petal.Width, color = Cluster)) + geom_point(data=as.data.frame(irisCluster$centers), aes(Petal.Length, Petal.Width), col = scales::muted(c("red", "green", "blue")),
              pch = 'x', size = 12)
-ggsave("iris_cluster2.png", p2, width=4, height =4)
+ggsave("figures/iris_cluster2.png", p2, width=4, height =4)
 @
 %https://datascienceplus.com/k-means-clustering-in-r/
 
@@ -1931,11 +1931,11 @@ ggsave("iris_cluster2.png", p2, width=4, height =4)
 \centering
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.9\textwidth]{iris_cluster1.png}
+  \includegraphics[width=0.9\textwidth]{figures/iris_cluster1.png}
 \end{minipage}%
 \begin{minipage}{.5\textwidth}
   \centering
-  \includegraphics[width=0.9\textwidth]{iris_cluster2.png}
+  \includegraphics[width=0.9\textwidth]{figures/iris_cluster2.png}
 \end{minipage}
 \caption{Iris dataset with (a) original labels and (b) 3-mean clusters.}
 \end{figure}
@@ -2051,7 +2051,7 @@ The agent takes actions, and receives updates in the form of state/reward pairs.
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\frame{\frametitle{Multi-Armed Bandits} 
+\frame{%\frametitle{Multi-Armed Bandits} 
 
 A simple introduction to the reinforcement learning problem is the case when there is only one state, also called a \href{http://en.wikipedia.org/wiki/Multi-armed_bandit}{\emph{multi-armed bandit}}.  This was named after the slot machines (one-armed bandits).
 
@@ -2069,7 +2069,7 @@ A simple introduction to the reinforcement learning problem is the case when the
 
 
 }
-}
+
 
 \frame{%\frametitle{Exploration vs. Exploitation} 
 
@@ -2082,7 +2082,7 @@ Online learning are a form of sequential optimization, and need to solve the \em
 
 \begin{figure}[H]
 \begin{center}
-\includegraphics[height=0.9\textheight, keepaspectratio]{src/reinforcement/images/e_e_1.png}
+\includegraphics[height=0.9\textheight, keepaspectratio]{figures/e_e_1.png}
 \end{center}
 \end{figure}
 
@@ -2094,7 +2094,7 @@ Online learning are a form of sequential optimization, and need to solve the \em
 
 \begin{figure}[H]
 \begin{center}
-\includegraphics[height=0.9\textheight, keepaspectratio]{src/reinforcement/images/e_e_2.png}
+\includegraphics[height=0.9\textheight, keepaspectratio]{figures/e_e_2.png}
 \end{center}
 \end{figure}
 
@@ -2110,14 +2110,13 @@ The $\epsilon$-Greedy algorithm is one of the simplest and yet most popular appr
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.7\textwidth]{src/reinforcement/images/epsilongreedy.png}
+\includegraphics[width=0.7\textwidth]{figures/epsilongreedy.png}
 \end{center}
 \end{figure}
 
-
 \vspace{5 mm}
 
-\tiny{\href{http://blog.yhathq.com/posts/the-beer-bandit.html}{(Picture courtesy of "Python Multi-armed Bandits" by Eric Chiang, yhat)}}
+\tiny{\href{http://blog.yhathq.com/posts/the-beer-bandit.html}{Picture courtesy of "Python Multi-armed Bandits" by Eric Chiang, yhat}}
 
 }
 
@@ -2207,11 +2206,14 @@ Grid world is a canonical example used in reinforcement learning.
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics{src/reinforcement/images/maze_1.png}
+\includegraphics{figures/maze_1.png}
 \end{center}
 \end{figure}
 
 %http://www0.cs.ucl.ac.uk/staff/D.Silver/web/Teaching_files/intro_RL.pdf
+\vspace{5 mm}
+
+\tiny{\href{http://www0.cs.ucl.ac.uk/staff/D.Silver/web/Teaching_files/intro_RL.pdf}{Image from David Silver.}}
 
 }
 
@@ -2221,9 +2223,13 @@ We need to find a policy to navigate through the maze.
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics{src/reinforcement/images/maze_2.png}
+\includegraphics{figures/maze_2.png}
 \end{center}
 \end{figure}
+
+\vspace{5 mm}
+
+\tiny{\href{http://www0.cs.ucl.ac.uk/staff/D.Silver/web/Teaching_files/intro_RL.pdf}{Image from David Silver.}}
 
 }
 
@@ -2233,9 +2239,13 @@ The policy is based on maximizing a value function, that is dependent on the sta
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics{src/reinforcement/images/maze_3.png}
+\includegraphics{figures/maze_3.png}
 \end{center}
 \end{figure}
+
+\vspace{5 mm}
+
+\tiny{\href{http://www0.cs.ucl.ac.uk/staff/D.Silver/web/Teaching_files/intro_RL.pdf}{Image from David Silver.}}
 
 }
 
@@ -2281,14 +2291,14 @@ Random forests differ in only one way from this general scheme: at each split, t
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.85\textwidth]{randomforest.png}
+\includegraphics[width=0.85\textwidth]{figures/randomforest.png}
 \end{center}
 \end{figure}
 
 
 \vspace{0.25in}
 
-\tiny{\textit{\href{http://provectus.com/blog/news/research-paper-for-load-forecast/}{Image source: Porvectus.}}
+\tiny{\textit{\href{http://provectus.com/blog/news/research-paper-for-load-forecast/}{Image source: Porvectus.}}}
 
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -2298,7 +2308,7 @@ Random forests differ in only one way from this general scheme: at each split, t
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.95\textwidth]{gbm_tress.png}
+\includegraphics[width=0.95\textwidth]{figures/gbm_tress.png}
 \end{center}
 \end{figure}
 
@@ -2313,7 +2323,7 @@ Random forests differ in only one way from this general scheme: at each split, t
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.95\textwidth]{revo_in_depth.png}
+\includegraphics[width=0.95\textwidth]{figures/revo_in_depth.png}
 \end{center}
 \end{figure}
 
@@ -2327,10 +2337,10 @@ Random forests differ in only one way from this general scheme: at each split, t
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.9\textwidth]{lenet5.jpg}
+\includegraphics[width=0.9\textwidth]{figures/lenet5.jpg}
 \caption{LeNET (1998), Yann LeCun et. al.}
 \par\vfill
-\includegraphics[width=0.9\textwidth]{alexnet_small.png}
+\includegraphics[width=0.9\textwidth]{figures/alexnet_small.png}
 \caption{AlexNET (2012), Alex Krizhevsky, Ilya Sutskever and Geoff Hinton}
 \end{center}
 %\caption{Titanic data from Kaggle competition shows a pattern predicting who survived: more likely to be female, wealthy, and/or young.  Can we model this?}
@@ -2387,7 +2397,7 @@ Pathnet (Deepmind 2017) uses multiple deep neural networks trained on different 
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.65\textwidth]{pathnet_arch.png}
+\includegraphics[width=0.65\textwidth]{figures/pathnet_arch.png}
 \end{center}
 \caption{\small{"It is a neural network algorithm that uses agents embedded in the neural network whose task is to discover which parts of the network to re-use for new tasks."}}
 \end{figure}
@@ -2404,7 +2414,7 @@ AlphaGo used several neural networks.
 
 \begin{figure}[!h]
 \begin{center}
-\includegraphics[width=0.95\textwidth]{alphago_network.png}
+\includegraphics[width=0.95\textwidth]{figures/alphago_network.png}
 \end{center}
 \end{figure}
 
@@ -2457,7 +2467,7 @@ Always important to make black box learning as "light box" as possible: don't tu
 
 \vspace{0.25in}
 
-Model objectives and constraints come from researchers.
+At the end of the day, model objectives and constraints come from researchers: we are still responsible for the results.
 
 \end{frame}
 %%%%%%%%%%%%%%%%%%%%%%%%%%
