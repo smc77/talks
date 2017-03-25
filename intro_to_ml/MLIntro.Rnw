@@ -1,0 +1,2465 @@
+\documentclass{beamer}
+
+\usepackage{tikz}
+\usetikzlibrary{arrows,positioning}
+
+\usepackage{color,amsmath}
+\usepackage{subfigure}
+\usepackage{booktabs}
+\usepackage{framed}
+\usepackage{comment}
+
+\usepackage{schemabloc}
+\usepackage[framemethod=tikz]{mdframed}
+
+\definecolor{links}{HTML}{2A1B81}
+\hypersetup{colorlinks,linkcolor=,urlcolor=links}
+
+\definecolor{mydarkblue}{HTML}{0066CC}
+\definecolor{mydarkred}{HTML}{990000}
+\definecolor{mydarkgreen}{HTML}{006600}
+\definecolor{myblue}{HTML}{336699}
+
+\tikzstyle{normalnode}=[draw,%
+                          rectangle,%
+                          shade,%
+                          minimum size  = 1.0cm,%
+                          node distance = 1.3cm]
+ \tikzstyle{normalnode2}=[draw,%
+                          rectangle,%
+                          shade,%
+                          minimum size  = 1.0cm,%
+                          node distance = 1.0cm]
+  \tikzstyle{normalnode3}=[draw,%
+                          rectangle,%
+                          shade,%
+                          minimum size  = 1.0cm,%
+                          node distance = 5.0cm]
+  \tikzstyle{normal}=[draw,fill=myblue,rectangle, minimum size=1.0cm,node
+  distance=2cm, text=white] 
+  \tikzstyle{start}=[draw,fill=green!70,rectangle, minimum size=1.0cm,node distance=1.3cm]                        
+  \tikzstyle{goal}=[draw,fill=red!70,rectangle, minimum size=1.0cm,node distance=1.3cm]
+  \tikzstyle{goal2}=[draw,fill=red!70,rectangle, minimum size=1.0cm,node distance=1.0cm]
+  \tikzstyle{agent}=[draw,fill=blue!70,circle,minimum size=0.6cm]
+  \tikzstyle{dummy}=[circle]
+\usetikzlibrary{automata,chains}
+
+\usetikzlibrary{positioning}
+\usetikzlibrary{intersections}
+
+\definecolor{myblue}{HTML}{336699}
+
+\setbeamertemplate{blocks}[rounded=true, shadow=true] 
+\setbeamercolor{block title}{bg=myblue,fg=white}
+\setbeamercolor{frametitle}{myblue}
+\setbeamercolor{title}{myblue}
+\usecolortheme[named=myblue]{structure}
+
+\usetikzlibrary{mindmap}
+\usepackage{adjustbox}
+
+
+\SweaveOpts{}
+
+\def\vf{\vfill}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\title[]{Probably Approximately Correct}
+\subtitle[]{A very brief tour of all of machine learning}
+\author[]{Shane Conway \\
+Kepos Capital}
+\date[]{}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\frame{\titlepage}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.98\textwidth]{figures/bloomberg.jpg}
+\end{center}
+\end{figure}
+
+\begin{tiny}
+\emph{Mentioned by Paul Kedrosky (@pkedrosky), March 1, 2017.}
+\end{tiny}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.98\textwidth]{figures/alphago.jpg}
+\end{center}
+\end{figure}
+
+
+\emph{The number of potential legal board positions in go is greater than the number of atoms in the universe.}
+%https://www.theatlantic.com/technology/archive/2016/03/the-invisible-opponent/475611/
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+<<fig=TRUE, echo=FALSE, eval=FALSE>>=
+# http://mhairihmcneill.com/blog/2016/04/05/wordclouds-in-ggplot.html
+# https://cran.r-project.org/web/packages/ggrepel/vignettes/ggrepel.html
+library(wordcloud)
+
+word_count <- data.frame(word=c("supervised", "unsupervised", "regression", "classification", "support vector machines", "neural networks", "trees", "random forests", "gradient boosting", "deep learning", "transfer learning", "reinforcement learning", "PAC", "kNN", "GAN", "logistic regression", "k-means"), count=c(3, 3, 5, 5, 3, 3.5, 3, 3, 3, 2.75, 2.75, 3, 3, 3, 3, 2.75, 3))
+#wordcloud(word_count[,1], word_count[,2])
+
+library(ggplot2)
+library(ggrepel)
+library(magrittr)
+library(dplyr)
+
+p <- word_count %>% 
+  slice(1:50) %>%
+ggplot +
+  aes(x = 1, y = 1, size = count, label = word) +
+  geom_text_repel(segment.size = 0, force = 20) +
+  scale_size(range = c(5, 12), guide = FALSE) +
+  scale_y_continuous(breaks = NULL) +
+  scale_x_continuous(breaks = NULL) +
+  labs(x = '', y = '') +
+  theme_classic()
+p
+ggsave("figures/wordcloud.png", p, width=8, height=4)
+@
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.98\textwidth]{figures/wordcloud.png}
+\end{center}
+\caption{A cloud of terminology.}
+\end{figure}
+
+\end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+
+\begin{adjustbox}{max totalsize={.9\textwidth}{.9\textheight},center}
+\begin{tikzpicture}[
+  mindmap,
+  every node/.style={concept, execute at begin node=\hskip0pt},
+  root concept/.append style={
+    concept color=black, fill=white, line width=1ex, text=black
+  },
+  text=white, grow cyclic,
+  level 1/.append style={level distance=4.5cm,sibling angle=90},
+  level 2/.append style={level distance=3cm,sibling angle=45}
+]
+
+\node[root concept] {Machine Learning} % root
+child[concept color=red!90, rotate=-45] { node {Unsupervised Learning}
+child[concept color=red!50] { node {K-Means Clustering} }
+child[concept color=red!50] { node {Hierarchical Clustering} }
+}
+child[concept color=blue!90, rotate=0] { node {Supervised Learning}
+child[concept color=blue!50] { node {Linear Regression} }
+child[concept color=blue!50] { node {Logistic Regression} }
+child[concept color=blue!50] { node {SVM} }
+child[concept color=blue!50] { node {kNN} }
+child[concept color=blue!50] { node {Neural Networks} }
+}
+child[concept color=green!50!black, rotate=45] { node  {Reinforcement Learning}
+child[concept color=green!80!black] { node {Multi-armed bandits} }
+child[concept color=green!80!black] { node {MDP} }
+child[concept color=green!80!black] { node {POMDP} }
+child[concept color=green!80!black] { node {Adversarial RL} }
+};
+\end{tikzpicture}
+\end{adjustbox}
+\end{center}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\section{Machine Learning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+
+\begin{adjustbox}{max totalsize={.9\textwidth}{.9\textheight},center}
+\begin{tikzpicture}[
+  mindmap,
+  every node/.style={concept, execute at begin node=\hskip0pt},
+  root concept/.append style={
+    concept color=black, fill=white, line width=1ex, text=black
+  },
+  text=white, grow cyclic,
+  level 1/.append style={level distance=4.5cm,sibling angle=90},
+  level 2/.append style={level distance=3cm,sibling angle=45}
+]
+
+\node[root concept,scale=1.2] {Machine Learning} % root
+child[concept color=gray!90, rotate=-45] { node [concept,scale=0.8]{Unsupervised Learning}
+child[concept color=gray!50] { node [concept,scale=0.8]{K-Means Clustering} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Hierarchical Clustering} }
+}
+child[concept color=gray!90, rotate=0] { node [concept,scale=0.8]{Supervised Learning}
+child[concept color=gray!50] { node [concept,scale=0.8]{Linear Regression} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Logistic Regression} }
+child[concept color=gray!50] { node [concept,scale=0.8]{SVM} }
+child[concept color=gray!50] { node [concept,scale=0.8]{kNN} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Neural Networks} }
+}
+child[concept color=gray!90, rotate=45] { node  [concept,scale=0.8]{Reinforcement Learning}
+child[concept color=gray!50] { node [concept,scale=0.8]{Multi-armed bandits} }
+child[concept color=gray!50] { node [concept,scale=0.8]{MDP} }
+child[concept color=gray!50] { node [concept,scale=0.8]{POMDP} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Adversarial RL} }
+};
+\end{tikzpicture}
+\end{adjustbox}
+\end{center}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{What is machine learning?}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{center}
+\huge{What is machine learning?}
+\end{center}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{large}
+
+Leo Breiman (2004) "The Two Cultures": 
+
+%\pause
+
+\vspace{0.25in}
+
+\begin{itemize}
+\item \emph{statistics} $\longrightarrow$ explanation
+%\pause
+\item \emph{machine learning} $\longrightarrow$ prediction
+\end{itemize}
+
+\end{large}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{large}
+
+\emph{All generalizations are false, including this one.} - Mark Twain
+
+\end{large}
+
+\vspace{0.25in}
+
+The truth is that machine learning (a CS field) and statistics have massive overlap, and both fields have benefitted from the interaction.
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{large}
+
+Efron and Hastie (2016) "Computer Age Statistic Inference"
+
+%\pause
+
+\vspace{0.25in}
+
+\begin{itemize}
+\item \emph{algorithms}: "what statisticians do"
+%\pause
+\item \emph{inference}: "why they do them"
+\end{itemize}
+
+\end{large}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Machine learning} (ML) studies algorithms that generalize from experience.
+
+%\pause
+\vspace{0.25in}
+
+\begin{itemize}
+%\item Aims to produce automated models given inputs (data) that produce a prediction (learning).
+\item AI involves machines that can perform tasks that are characteristic of human intelligence. (John McCarthy 1956)
+%\pause
+\item ML is a subfield of computer science that "gives computers the ability to learn without being explicitly programmed". (Arthur Samuel, 1959)
+%\pause
+\item Study of algorithms that: 
+  \begin{itemize}
+  \item improve their performance $P$ 
+  \item at some task $T$ 
+  \item with experience $E$ 
+  \end{itemize}
+\end{itemize}
+
+Well-defined learning task: $<P, T, E>$. (Tom Mitchell)
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+A learning theory by any other name...
+
+%\pause
+
+\vspace{0.25in}
+
+\begin{itemize}
+\item \emph{artificial intelligence}
+%\pause
+\item \emph{statistics}
+%\pause
+\item \emph{data mining} and \emph{pattern recognition}
+\end{itemize}
+
+\vspace{0.25in}
+
+%\pause
+
+ML grew from different academic disciplines (statistics, computer science, neuroscience) with a tight connection to industry.
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{Learning Theory}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{center}
+\huge{Learning Theory}
+\end{center}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Learning theory} is a subfield of artificial intelligence devoted to studying the design and analysis of machine learning algorithms.
+
+%\pause
+
+\vspace{0.25in}
+
+Some important ideas:
+
+\begin{itemize}
+\item Probably Approximately Correct (PAC) learning
+\item Vapnik-Chervonenkis (VC) theory
+\item Occam learning
+\item Cover's theorem
+\end{itemize}
+
+%https://en.wikipedia.org/wiki/Category:Computational_learning_theory
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+Probably Approximately Correct (Leslie Valient 1984) provides a mathematical theory to characterize selected hypotheses with high probability (Probably) to have low error (Approximately Correct).  
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{figures/pac.png}
+\end{center}
+\end{figure}
+
+%\pause
+
+\begin{small}
+\emph{"The critical idea in PAC learning is that both statistical as well as computational phenomena are acknowledged, and both are quantified."} -Leslie Valiant
+\end{small}
+
+%https://jeremykun.com/2014/01/02/probably-approximately-correct-a-formal-theory-of-learning/
+%https://en.wikipedia.org/wiki/Probably_approximately_correct_learning
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{figures/pac.png}
+\end{center}
+\end{figure}
+
+PAC learning defines the following:
+
+\begin{itemize}
+  \item $X$ is the instance space, and $x$ is a specific instance
+  \item $C$ is the concept class in $X$, where $c$ is a specific concept
+  \item $H$ is the class of all possible hypotheses, and $h$ is an instance of a hypothesis
+  \item $f$ is the true function to be learned
+  \item $\epsilon$ represents the level of misestimation, while $\delta$ is our confidence in the estimate
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{figures/pac.png}
+\end{center}
+\end{figure}
+
+Then something is PAC learnable if there exists an algorithm $A$ that can probably learn with sufficient accuracy in *finite time*:
+
+\begin{equation*}
+P_D( P(h(x) \neq c(x)) < \epsilon) >= 1 - \delta
+\end{equation*}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}
+% 
+% Rademacher complexity, growth function, VC-dimension
+% 
+% Vapnik
+% 
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}
+% 
+% \begin{center}
+% \huge{Running example: learning about economic development}
+% \end{center}
+% 
+% \end{frame}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}
+% 
+% There are a number of theories for macro-economic development:
+% 
+% \begin{itemize}
+% \item Geography
+% \item Institutions
+% \item Culture
+% \end{itemize}
+% 
+% Can we predict a country's wealth from data?
+% 
+% \begin{itemize}
+% \item Geographic location
+% \item Neighbor's wealth
+% \item Access to water
+% \item Institutional development
+% \end{itemize}
+% 
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{center}
+\huge{Running example: Fisher's "Iris flower" dataset}
+\end{center}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+
+The \href{https://en.wikipedia.org/wiki/Iris_flower_data_set}{\emph{Iris flower data set}} or Fisher's Iris data set is a multivariate data set introduced by Ronald Fisher in his 1936 paper \empy{The use of multiple measurements in taxonomic problems} as an example of linear discriminant analysis.
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{.3\textwidth}
+  \centering
+  \includegraphics[height=0.3\textheight]{figures/setosa.jpg}
+\end{minipage}%
+\begin{minipage}{.3\textwidth}
+  \centering
+  \includegraphics[height=0.3\textheight]{figures/versicolor.jpg}
+\end{minipage}
+\begin{minipage}{.3\textwidth}
+  \centering
+  \includegraphics[height=0.3\textheight]{figures/virginica.jpg}
+\end{minipage}
+%\caption{Iris dataset with (a) original labels and (b) 3-mean clusters.}
+\end{figure}
+
+The data set consists of 50 samples from each of three species of Iris (Iris setosa, Iris virginica and Iris versicolor). Four \emph{features} were measured from each sample: the length and the width of the sepals and petals, in centimetres. 
+
+\vspace{0.25in}
+
+\tiny{\textit{Images courtesy of wikipedia.}}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+<<eval=FALSE, echo=FALSE>>=
+library("GGally")
+p <- ggpairs(iris[, 1:5])
+ggsave("figures/iris_scatter.png", p, width=8, height=5)
+@
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{figures/iris_scatter.png}
+\end{center}
+\caption{Scatterplot matrix of iris dataset.  Flower dimensions are input features, while the species is usually a target variable in classification problems.}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\subsection{How machine learning works}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{center}
+\huge{How machine learning \emph{works}}
+\end{center}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+%Picture of blackbox (inputs, output)
+
+\begin{figure}
+\begin{tikzpicture}[
+node distance = 4mm and 22mm
+                        ]
+\node (adc) [draw,minimum size=24mm] {Model};
+%
+\coordinate[above left = of adc.west]   (a1);
+\coordinate[below = of a1]              (a2);
+\coordinate[below = of a2]              (a3);
+\coordinate[above right= 8mm and 22mm of adc.east]  (b1);
+\foreach \i [count=\xi from 1] in {2,...,5} 
+    \coordinate[below=of b\xi]  (b\i);
+%
+\foreach \i [count=\xi from 1] in {$X_1$, $X_2$, $\dots$}
+\draw[-latex']  (a\xi) node[left] {\i} -- (a\xi-| adc.west);
+\foreach \i [count=\xi from 3] in {Y}
+    \draw[-latex'] (adc.east |- b\xi) -- (b\xi) node[right] {\i};
+\end{tikzpicture}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+Machine learning includes several different kinds of \emph{models}:
+
+%\pause
+
+\vspace{0.25in}
+
+\begin{itemize}
+  \item Supervised learning: learn a function by fitting labeled targets and input features.
+%\pause
+  \item Unsupervised learning: learn a function by fitting to input features (without  labeled targets).
+%\pause
+  \item Reinforcement learning: learn a policy based on receiving rewards for taking actions in states.
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{figure}[H]
+\begin{center}
+
+\begin{tikzpicture}
+  \tikzset{venn circle/.style={draw,circle,minimum width=5cm,fill=#1,opacity=0.6}}
+
+  \node [venn circle = green!50!black, align=left] (A) at (0,0) {$$};
+  \node at (-1cm, -1cm) {$Reinforcement$};
+  \node [venn circle = blue!80, align=top] (B) at (1.5cm,2cm) {$$};
+  \node at (1.5cm, 4cm) {$Supervised$};
+  \node [venn circle = red!80, align=right] (C) at (3cm, 0) {$$};
+  \node at (5cm, -1cm) {$Unsupervised$};
+  \node[left] at (barycentric cs:A=1/2,B=1/2 ) {$RL Function \\ Approx.$}; 
+  \node[below] at (barycentric cs:A=1/2,C=1/2 ) {$$};   
+  \node[right] at (barycentric cs:B=1/2,C=1/2 ) {$Semi-Supervised$};   
+  \node[below] at (barycentric cs:A=1/3,B=1/3,C=1/3 ){$Active$};
+\end{tikzpicture}  
+\end{center}
+% \caption[]
+%  {Different branches of machine learning, along with methods for combining such as function approximation, semi-supervised learning, and active learning.}
+  \label{fig:reinforcement_cycle}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+The decision for which model is a factor of a number of issues:
+
+%\pause
+
+\begin{itemize}
+  \item Is there a sequential aspect to my data? Yes $\longrightarrow$ Reinformcement Learning (or other time series model)
+%\pause
+  \item Do I have labelled data? Yes $\longrightarrow$ Supervised Learning, else Unsupervised Learning
+%\pause
+  \begin{itemize}
+    \item Is target variable continuous? Yes $\longrightarrow$ Regression, else Classification
+  \end{itemize}
+
+\end{itemize}
+
+%\pause
+
+There are a number of other considerations:
+
+\begin{itemize}
+  \item Is there enough data?
+  \item Is target "learnable"?
+  \item Is the relationship linear or non-linear?
+  \item Can the data fit in memory?
+  \item Do I care more about accuracy or speed?
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+Machine learning in practice is more than \emph{models}; it includes a set of tools to make predictions robust.
+
+%\pause
+
+\vspace{0.25in}
+
+\begin{itemize}
+\item Feature engineering
+%\pause
+\item Regularization
+%\pause
+\item Feature selection
+%\pause
+\item Hyperparameter tuning
+%\pause
+\item Model selection
+%\pause
+\item Ensembling
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Automated Machine Learning (AutoML)} is a subfield of machine learning that aims to completely remove human decision making from the machine learning pipeline.
+
+\vspace{0.25in}
+
+%\pause
+
+Some examples:
+
+\begin{itemize}
+  \item Commercial: DataRobot, Ayasdi, SparkBeyond
+  \item Open Source: Auto-Sklearn, Tpot, Caret
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{figures/tpot-ml-pipeline.png}
+\end{center}
+\caption{An example of a machine learning \emph{pipeline} from tpot.}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+We are interested in how our models will perform on unseen data.
+
+%\pause
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{figures/cv.png}
+\end{center}
+\caption{\emph{Cross-validation} divides a dataset into folds, and runs through by comparing the \emph{training} and \emph{validation} performance.}
+\end{figure}
+
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+A large part of machine learning is aiming to solve the \emph{bias-variance trade-off}.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{figures/bv_tradeoff.png}
+\end{center}
+\caption{Increasing the model complexity can improve performance (lower bias), but eventually will cause over-fitting (higher variance).}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+Linear \emph{regression} predicts a continuous variable from a number of inputs:
+
+\begin{equation*}
+y = \beta_0 + \beta_1 x_1 + \beta_2 x_2 + \dots + \epsilon
+\end{equation*}
+
+\vspace{0.25in}
+
+The most popular method for regression is OLS, commonly solved using the matrix formulation:
+
+\begin{equation*}
+\hat \beta = (X^T X)^{-1} X^T y
+\end{equation*}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+<<fig=FALSE, echo=FALSE, eval=FALSE>>=
+p <- ggplot(data=iris, aes(x=Petal.Length, y=Petal.Width)) + geom_point() + geom_smooth(method='lm')
+ggsave("ols1.png", p, width=4, height=4)
+
+p2 <- ggplot(data=iris, aes(x=Sepal.Length, y=Sepal.Width)) + geom_point() + geom_smooth(method='lm')
+ggsave("ols2.png", p2, width=4, height=4)
+@
+
+This shows that there is a strong linear relationship between petal dimensions, but not between sepal dimensions in the iris dataset.
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.9\textwidth]{ols1.png}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.9\textwidth]{ols2.png}
+\end{minipage}
+\end{figure}
+
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+As an example, suppose that we have a simple function, that we observe with some noise $\epsilon$:
+
+\begin{equation*}
+y = sin(2 \pi x) + \epsilon
+\end{equation*}
+
+<<fig=FALSE, echo=FALSE, eval=FALSE>>=
+library(PolynomF)
+
+n <- 10
+
+f <- function(x) sin(2 * pi * x)
+
+x <- seq(0, 1, length=n)
+y <- f(x) + rnorm(n, sd=0.3)
+#d <- f(x) + rnorm(10, sd=0.2)
+
+# How to fit explicit polynomial terms4; easier with poly() function
+fit <- lm(y ~ x + I(x^2) + I(x^3))
+fit <- lm(y ~ poly(x, 3, raw=TRUE))
+x#summary(fit)
+
+# We can predict these values using the coefficients directly 
+x.data <- data.frame(rep(1, n), x, x^2, x^3)
+y.pred <- apply(fit[["coefficients"]] * t(x.data), 2, sum)
+
+# Or we can just use the predict function to do the same thing
+y.pred <- predict(fit)
+
+png("poly1.png", width=8, height=4, units="in", res=300)
+
+plot(data.frame(x, y))
+curve(f, type="l", col="green", add=TRUE)
+#points(data.frame(x, y.pred), col="red")
+dev.off()
+
+f <- ggplot(data.frame(x = x), aes(x))
+f <- f + stat_function(fun = function(x) sin(2 * pi * x), colour = "green")
+f <- f + geom_point(data=data.frame(x, y), aes(x=x, y=y))
+ggsave("poly1.png", f, width=8, height=4)
+@
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{poly1.png}
+\end{center}
+%\caption{Increasing the model complexity can improve performance (lower bias), but eventually will cause over-fitting (higher variance.}
+\end{figure}
+
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+Without knowing the real function, we can estimate it by fitting polynomials:
+
+\begin{equation*}
+\hat y = \beta_0 + \beta_1 x + \beta_2 x^2 + \dots + \epsilon
+\end{equation*}
+
+
+<<fig=TRUE, echo=FALSE, eval=FALSE>>=
+
+png("poly2.png", width=8, height=4, units="in", res=300)
+
+par(mfrow=c(2, 2), mar=c(1,1,1,1))
+
+for (i in c(1, 3, 6, 9)) {
+  plot(data.frame(x, y), xlab=paste("polynomial fit order", i), ylab="f(x)")
+  curve(f, type="l", col="green", add=TRUE)
+  fit <- lm(y ~ poly(x, i, raw=TRUE))
+  p <- polynom(coef(fit))
+  curve(p, col="red", add=TRUE)
+}
+dev.off()
+data = data.frame(x=x, y=y)
+f <- ggplot(data=data, aes(x))
+f <- f + stat_function(fun = function(x) sin(2 * pi * x), colour = "green")
+f <- f + geom_point(aes(x, y))
+p1 <- f + stat_smooth(aes(x, y), method="lm", se=TRUE, fill=NA,
+                formula=y ~ poly(x, 1, raw=TRUE),colour="red")
+p3 <- f + stat_smooth(aes(x, y), method="lm", se=TRUE, fill=NA,
+                formula=y ~ poly(x, 3, raw=TRUE),colour="red")
+p6 <- f + stat_smooth(aes(x, y), method="lm", se=TRUE, fill=NA,
+                formula=y ~ poly(x, 6, raw=TRUE),colour="red")
+p9 <- f + stat_smooth(aes(x, y), method="lm", se=TRUE, fill=NA,
+                formula=y ~ poly(x, 9, raw=TRUE),colour="red") 
+
+ggsave("p1.png", p1, width=6, height = 3)
+ggsave("p3.png", p3, width=6, height = 3)
+ggsave("p6.png", p6, width=6, height = 3)
+ggsave("p9.png", p9, width=6, height = 3)
+@
+
+% \begin{center}
+% \includegraphics[width=0.9\textwidth]{poly2.png}
+% \end{center}
+% %\caption{Increasing the model complexity can improve performance (lower bias), but eventually will cause over-fitting (higher variance.}
+
+\begin{figure}[!h]
+
+\begin{columns}[t]
+\column{.5\textwidth}
+\centering
+\includegraphics[width=5cm]{p1.png}\ %\pause   
+\includegraphics[width=5cm]{p3.png} %\pause
+\column{.5\textwidth}
+\centering
+\includegraphics[width=5cm]{p6.png}\  %\pause
+\includegraphics[width=5cm]{p9.png} 
+\end{columns}
+
+\end{figure}
+  
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}
+% 
+% <<fig=TRUE, echo=FALSE>>=
+% fit.values <- matrix(ncol=2)
+% for (i in 1:9) {
+%   fit.sum <- summary(lm(y ~ poly(x, i, raw=TRUE)))
+%   fit.values <- rbind(fit.values, c(i, fit.sum["r.squared"][[1]]))
+% }
+% 
+% colnames(fit.values) <- c("Polynomial Order", "R^2")
+% plot(fit.values, type="l")
+% 
+% @
+% 
+% \end{frame}
+% %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+This shows the error rates for different numbers of polynomials.
+
+<<fig=TRUE, echo=FALSE, eval=FALSE>>=
+library(plyr)
+library(reshape2)
+#
+# Let's look at how the different models generalize between different datasets
+#
+
+n.training <- 10
+n.test <- 10
+
+error.function <- function(y, y.pred) sum((y.pred - y)^2) / 2
+
+e.rms <- function(y, y.pred) sqrt(2 * error.function(y=y, y.pred=y.pred) / length(y))
+
+build.data <- function(n) {
+	f <- function(x) sin(2 * pi * x)
+	x <- seq(0, 1, length=n)
+	y <- f(x) + rnorm(n, sd=0.3)
+	return(data.frame(y=y, x=x))
+}
+
+training <- build.data(n=n.training)
+test <- build.data(n=n.test)
+
+test.poly.error.lm <- function(training, test, polynomials=1:9) {
+
+	errors.training <- errors.test <- numeric()
+	for(i in polynomials) {
+		fit <- lm(y ~ poly(x, i, raw=TRUE), data=training)
+		y.pred.training <- predict(fit)
+		errors.training[i] <- e.rms(training$y, y.pred.training)
+		y.pred.test <- predict(fit, newdata=test)		
+		errors.test[i] <- e.rms(test$y, y.pred.test)
+	}
+	errors <- data.frame(polynomial=polynomials, training.error=errors.training, test.error=errors.test)
+	return(errors)
+}
+
+library(ggplot2)
+
+errors <- test.poly.error.lm(training, test)
+errors <- melt(errors, "polynomial")
+colnames(errors) <- c("polynomial", "dataset", "error")
+
+p <- ggplot(errors, aes(x=polynomial, y=error, group=dataset, colour=dataset)) + geom_line()
+ggsave("loss_curve1.png", p, width=8, height=4)
+@
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{loss_curve1.png}
+\end{center}
+%\caption{Increasing the model complexity can improve performance (lower bias), but eventually will cause over-fitting (higher variance.}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+One "simple" way to solve for overfitting is by getting more data, which is one benefit of Big Data.
+
+<<fig=TRUE, echo=FALSE, eval=FALSE>>=
+
+png("poly3.png", width=8, height=6, units="in", res=300)
+
+# Adding more data:
+par(mfrow=c(2, 2), mar=c(1,1,1,1))
+
+for (i in c(10, 50, 100, 1000)) {
+  x <- seq(0, 1, length=i)
+  d <- f(x) + rnorm(i, sd=0.3)
+
+  plot(data.frame(x, d), xlab=paste("Data size:", i), ylab="f(x)")
+  curve(f, type="l", col="green", add=TRUE)
+  fit <- lm(d ~ poly(x, 9, raw=TRUE))
+  summary(fit)["r.squared"][[1]]
+  p <- polynom(coef(fit))
+  curve(p, col="red", add=TRUE)
+}
+dev.off()
+
+for (i in c(10, 50, 100, 1000)) {
+  x <- seq(0, 1, length=i)
+  d <- sin(2 * pi * x) + rnorm(i, sd=0.3)
+
+  data = data.frame(x=x, y=d)
+  f <- ggplot(data=data, aes(x))
+  f <- f + stat_function(fun = function(x) sin(2 * pi * x), colour = "green")
+  f <- f + geom_point(aes(x, y))
+  p_i <- f + stat_smooth(aes(x, y), method="lm", se=TRUE, fill=NA,
+                  formula=y ~ poly(x, 9, raw=TRUE),colour="red")
+
+  ggsave(paste("p", i, ".png", sep=""), p_i, width=6, height = 3)
+}
+
+@
+
+\begin{figure}[!h]
+
+\begin{columns}[t]
+\column{.5\textwidth}
+\centering
+\includegraphics[width=5cm]{p10.png}\ %\pause   
+\includegraphics[width=5cm]{p50.png} %\pause
+\column{.5\textwidth}
+\centering
+\includegraphics[width=5cm]{p100.png}\    %\pause
+\includegraphics[width=5cm]{p1000.png} 
+\end{columns}
+
+\end{figure}
+  
+
+
+% \begin{figure}[!h]
+% \begin{center}
+% \includegraphics[width=0.9\textwidth]{poly3.png}
+% \end{center}
+% %\caption{Increasing the model complexity can improve performance (lower bias), but eventually will cause over-fitting (higher variance.}
+% \end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+Another way to solve for overfitting is to use \emph{regularization}, which is a method that penalizes features, and thus can be used for variable or model selection.
+
+\vspace{0.2in}
+
+%http://statweb.stanford.edu/~tibs/sta305files/Rudyregularization.pdf
+%https://web.stanford.edu/~hastie/glmnet/glmnet_alpha.html#log
+%https://rstudio-pubs-static.s3.amazonaws.com/22067_48fad02fb1a944e9a8fb1d56c55119ef.html#ridge-regression-and-lasso
+%https://jamesmccammon.com/2014/04/20/lasso-and-ridge-regression-in-r/
+%http://stats.stackexchange.com/questions/866/when-should-i-use-lasso-vs-ridge
+%http://www.moneyscience.com/pg/blog/StatAlgo/read/361155/stanford-ml-52-regularization
+
+Lasso regression uses a $l_1$ norm:
+\begin{equation*}
+RSS(\beta) = \sum_{i=0}^n (y_i - x_i^T \beta)^2 + \lambda |\beta|
+\end{equation*}
+
+Ridge regression uses an $l_2$ norm:
+\begin{equation*}
+RSS(\beta) = \sum_{i=0}^n (y_i - x_i^T \beta)^2 + \lambda |\beta|^2
+\end{equation*}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+These function shrink the coefficients toward zero.  Ridge never reaches zero.
+
+<<ridge_lasso, fig=FALSE, echo=FALSE, eval=FALSE>>=
+
+library(ISLR)
+Hitters=na.omit(Hitters)
+with(Hitters,sum(is.na(Salary)))
+
+library(glmnet)
+x=model.matrix(Salary~.-1,data=Hitters) 
+y=Hitters$Salary
+
+fit.ridge=glmnet(x,y,alpha=0)
+png("fit_ridge.png", width=4, height=4, units="in", res=300)
+plot(fit.ridge,xvar="lambda",label=TRUE)
+dev.off()
+
+mat = fit.ridge$beta
+summ <- summary(mat)
+ridge_coef = data.frame(Origin      = rownames(mat)[summ$i],
+           Destination = colnames(mat)[summ$j],
+           Lambda = log(fit.ridge$lambda[summ$j]),
+           Coefficient      = summ$x)
+p <- ggplot(ridge_coef[ridge_coef$Lambda < 10,], aes(x=Lambda, y=Coefficient, group=Origin, color=Origin)) + geom_line()
+ggsave("ridge_coef.png", p)
+
+fit.lasso=glmnet(x,y,alpha=1)
+png("fit_lasso.png", width=4, height=4, units="in", res=300)
+plot(fit.lasso,xvar="lambda",label=TRUE)
+dev.off()
+
+mat = fit.lasso$beta
+summ <- summary(mat)
+lasso_coef = data.frame(Origin      = rownames(mat)[summ$i],
+           Destination = colnames(mat)[summ$j],
+           Lambda = log(fit.lasso$lambda[summ$j]),
+           Coefficient      = summ$x)
+p <- ggplot(lasso_coef, aes(x=Lambda, y=Coefficient, group=Origin, color=Origin)) + geom_line()
+ggsave("lasso_coef.png")
+@
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.9\textwidth]{ridge_coef.png}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.9\textwidth]{lasso_coef.png}
+\end{minipage}
+\caption{\small{Path for coefficients as lambda is increased in (a) ridge and (b) lasso.  Data predicting salaries for MLB players from 1986/87 from Games/Witten/Hastie/Tibshirani (2013).}}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}
+% 
+% Another way to solve for overfitting is to use \emph{regularization}.
+% 
+% <<fig=TRUE, echo=FALSE, eval=FALSE>>=
+% #
+% # Let's look at how the different models generalize between different datasets
+% #
+% 
+% n.training <- 10
+% n.test <- 10
+% 
+% error.function <- function(y, y.pred) sum((y.pred - y)^2) / 2
+% 
+% e.rms <- function(y, y.pred) sqrt(2 * error.function(y=y, y.pred=y.pred) / length(y))
+% 
+% build.data <- function(n) {
+% 	f <- function(x) sin(2 * pi * x)
+% 	x <- seq(0, 1, length=n)
+% 	y <- f(x) + rnorm(n, sd=0.2)
+% 	return(data.frame(y=y, x=x))
+% }
+% 
+% #training <- build.data(n=n.training)
+% #test <- build.data(n=n.test)
+% 
+% predict.ridge <- function(fit, test.x) {
+% 	return(scale(test.x, center = F, scale = fit$scales) %*% fit$coef[,which.min(fit$GCV)] + fit$ym)
+% }
+% 
+% test.poly.error <- function(training, test, polynomials=2:9) {
+% 
+% 	errors.training <- errors.test <- numeric()
+% 	for(i in polynomials) {
+% 		fit <- lm.ridge(y~poly(x, i, raw=TRUE), data=training, lambda=seq(0, 50, 1))
+% 		y.pred.training <- predict.ridge(fit, poly(training$x, i, raw=TRUE))
+% 		errors.training[i] <- e.rms(training$y, y.pred.training)
+% 		y.pred.test <- predict.ridge(fit, poly(test$x, i, raw=TRUE))
+% 		errors.test[i] <- e.rms(test$y, y.pred.test)
+% 	}
+% 	errors <- data.frame(polynomial=polynomials, training.error=errors.training[polynomials], test.error=errors.test[polynomials])
+% 	return(errors)
+% }
+% 
+% library(ggplot2)
+% library(MASS)
+% 
+% errors <- test.poly.error(training, test)
+% errors <- melt(errors, "polynomial")
+% colnames(errors) <- c("polynomial", "dataset", "error")
+% 
+% p <- ggplot(errors, aes(x=polynomial, y=error, group=dataset, colour=dataset)) + geom_line()
+% print(p)
+% @
+% 
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Supervised Learning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+
+\begin{adjustbox}{max totalsize={.9\textwidth}{.9\textheight},center}
+\begin{tikzpicture}[
+  mindmap,
+  every node/.style={concept, execute at begin node=\hskip0pt},
+  root concept/.append style={
+    concept color=black, fill=white, line width=1ex, text=black
+  },
+  text=white, grow cyclic,
+  level 1/.append style={level distance=4.5cm,sibling angle=90},
+  level 2/.append style={level distance=3cm,sibling angle=45}
+]
+
+\node[root concept, scale=0.8] {Machine Learning} % root
+child[concept color=gray!90, rotate=-45] { node [concept,scale=0.8]{Unsupervised Learning}
+child[concept color=gray!50] { node [concept,scale=0.8]{K-Means Clustering} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Hierarchical Clustering} }
+}
+child[concept color=blue!90, rotate=0] { node [concept,scale=1.1]{Supervised Learning}
+child[concept color=blue!50] { node [concept,scale=1.1]{Linear Regression} }
+child[concept color=blue!50] { node [concept,scale=1.1]{Logistic Regression} }
+child[concept color=blue!50] { node [concept,scale=1.1]{SVM} }
+child[concept color=blue!50] { node [concept,scale=1.1]{kNN} }
+child[concept color=blue!50] { node [concept,scale=1.1]{Neural Networks} }
+}
+child[concept color=gray!90, rotate=45] { node  [concept,scale=0.8]{Reinforcement Learning}
+child[concept color=gray!50] { node [concept,scale=0.8]{Multi-armed bandits} }
+child[concept color=gray!50] { node [concept,scale=0.8]{MDP} }
+child[concept color=gray!50] { node [concept,scale=0.8]{POMDP} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Adversarial RL} }
+};
+\end{tikzpicture}
+\end{adjustbox}
+\end{center}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{center}
+\huge{Supervised Learning}
+\end{center}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Supervised learning} involves learning a model given labeled examples and input features.
+
+\begin{equation*}
+y = f(X)
+\end{equation*}
+
+%\pause
+
+Examples of models:
+
+\begin{itemize}
+\item Linear regression
+\item Logistic regression
+\item Support vector machines
+\item Neural network
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Classification} predicts a discrete variable from a number of inputs.  
+
+<<fig=TRUE, echo=FALSE, eval=FALSE>>=
+n=30; x1=matrix(runif(2*n), n, 2); y1=rep(1,n); x2=1.3 + matrix(runif(2*n),n,2); y2=rep(-1,n);
+class_data=data.frame(x=c(x1[,1], x2[,1]), y=c(x1[,2], x2[,2]), class=factor(c(y1,y2)))
+
+p <- ggplot(class_data, aes(x,y, color=class)) +
+    geom_point(size=3) +
+    geom_abline(intercept=2, slope=-0.5) +
+    geom_abline(intercept=2.3, slope=-0.9) + geom_abline(intercept=1.4, slope=-0.3) +                   geom_abline(intercept=2.3, slope=-0.8) + geom_abline(intercept=2.1, slope=-0.7)
+ggsave("random_fit.png", p, width=8, height=4)
+@
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{random_fit.png}
+\end{center}
+\caption{Taking two classes of data, we can separate them using many different lines.  Classifiers will try to minimize a particular \emph{loss function}.}
+\end{figure}
+
+% Source: https://rstudio-pubs-static.s3.amazonaws.com/97625_9321b07bf2924dc299706adc238db11e.html
+
+\end{frame}
+
+
+\begin{frame}
+
+One common method for classification is \emph{logistic regression}, which computes a probability of being in one class or another by using a sigmoid function:
+
+\begin{equation*}
+p(x) = \frac{1}{1+e^{-x}}
+\end{equation*}
+
+<<fig=FALSE, echo=FALSE, eval=FALSE>>=
+library(ggplot2)
+iris[, "Setosa"] = as.integer(iris$Species == 'setosa')
+p <- ggplot(iris, aes(x=Sepal.Length, y=Setosa)) + geom_point() + 
+  stat_smooth(method="glm", method.args=list(family="binomial"), se=FALSE)
+#print(p)
+ggsave("logistic_regression_ggplot.png", p, width=8, height=4)
+@
+
+
+\begin{figure}[h!]
+\begin{center}
+%\includegraphics[width=0.8\textwidth]{logistic_regression.png}
+\includegraphics[width=0.8\textwidth]{logistic_regression_ggplot.png}
+\end{center}
+\end{figure}
+
+%http://www.cookbook-r.com/Statistical_analysis/Logistic_regression/
+%https://florianhartl.com/logistic-regression-geometric-intuition.html
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}
+% 
+% %http://jocelynchi.com/notes-on-logistic-regression-with-examples-in-r
+% <<eval=FALSE>>=
+% library(datasets)
+% 
+% # make indicator variable for setosa
+% y <- numeric(length=nrow(iris))
+% y[which(iris$Species == "setosa")] <- 1 
+% 
+% # identify predictors
+% X <- as.matrix(iris[,1]) # just sepal length
+% 
+% b_init <- matrix(c(26,-4.8))
+% l <- function(X,y,b) {
+%   -t(y)%*%(X%*%b) + sum(log(1+exp(X%*%b)))
+% }
+% grad_l <- function(X,y,b) {
+%   -t(X)%*%(y-plogis(X%*%b))
+% }
+% alpha = 2/(0.25*svd(cbind(1,X))$d[1]**2)
+% 
+% # modified gdescent function from gettingtothebottom R package
+% logit.fit <- logit_gdescent(l,grad_l,X,y,b_init,alpha=alpha,iter=70000,tol=1e-03,autoscaling=FALSE)
+% 
+% # Obtain estimated coefficients
+% iterations <- logit.fit$iter
+% beta <- logit.fit$b[,iterations-1]
+% 
+% # Obtain predictions
+% predictions <- round(plogis(beta[1] + X%*%beta[2:length(beta)]),3)
+% 
+% # Using the df data frame from before
+% df$logistic <- predictions
+% qq <- ggplot(data=df, aes(x=sepal.length, y=setosa)) + geom_point()
+% qq <- qq + geom_line(data=df, aes(x=sepal.length, y=logistic), colour="blue")
+% qq
+% @
+% 
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}
+% 
+% \emph{Logistic regression} 
+% 
+% <<fig=TRUE, echo=FALSE>>=
+% num.iterations <- 1000
+% 
+% # Download South African heart disease data
+% sa.heart <- read.table("https://www-stat.stanford.edu/~tibs/ElemStatLearn/datasets/SAheart.data", sep=",",head=T,row.names=1)
+% 
+% x <- sa.heart[,c("age", "ldl")]
+% y <- sa.heart$chd
+% 
+% plot(x, pch=21, bg=c("red","green")[factor(y)])
+% @
+% 
+% 
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{K-Nearest Neighbors (KNN)} makes a comparison to the $k$ nearest neighbors values.  
+
+%https://kevinzakka.github.io/2016/07/13/k-nearest-neighbor/
+% http://stackoverflow.com/questions/31234621/variation-on-how-to-plot-decision-boundary-of-a-k-nearest-neighbor-classifier-f
+
+<<echo=FALSE, eval=FALSE>>=
+train <- rbind(iris3[1:25,3:4,1],
+              iris3[1:25,3:4,2],
+              iris3[1:25,3:4,3])
+cl <- factor(c(rep("s",25), rep("c",25), rep("v",25)))
+
+ require(MASS)
+
+ test <- expand.grid(x=seq(min(train[,1]-1), max(train[,1]+1),
+                           by=0.1),
+                     y=seq(min(train[,2]-1), max(train[,2]+1), 
+                           by=0.1))
+ 
+ require(class)
+plot.knn <- function(k=1) {
+   classif <- knn(train, test, cl, k = k, prob=TRUE)
+   prob <- attr(classif, "prob")
+   
+    require(dplyr)
+  
+   dataf <- bind_rows(mutate(test,
+                             prob=prob,
+                             cls="c",
+                             prob_cls=ifelse(classif==cls,
+                                             1, 0)),
+                      mutate(test,
+                             prob=prob,
+                             cls="v",
+                             prob_cls=ifelse(classif==cls,
+                                             1, 0)),
+                      mutate(test,
+                             prob=prob,
+                             cls="s",
+                             prob_cls=ifelse(classif==cls,
+                                             1, 0)))
+   
+  require(ggplot2)
+  p <- ggplot(dataf) +
+      geom_point(aes(x=x, y=y, col=cls),
+                 data = mutate(test, cls=classif),
+                 size=0.5) + 
+      geom_contour(aes(x=x, y=y, z=prob_cls, group=cls, color=cls),
+                   bins=2,
+                   data=dataf) +
+      geom_point(aes(x=x, y=y, col=cls),
+                 size=3,
+                 data=data.frame(x=train[,1], y=train[,2], cls=cl)) +
+      ylab('Petal.Width') + xlab('Petal.Length')
+  
+  p
+  
+}
+p1 <- plot.knn(1)
+p3 <- plot.knn(3)
+ggsave("knn1.png", p1, width=4, height = 4)
+ggsave("knn3.png", p3, width=4, height = 4)
+@
+
+<<echo=FALSE, eval=FALSE>>=
+library(ElemStatLearn)
+require(class)
+x <- mixture.example$x
+g <- mixture.example$y
+xnew <- mixture.example$xnew
+mod15 <- knn(x, xnew, g, k=15, prob=TRUE)
+prob <- attr(mod15, "prob")
+prob <- ifelse(mod15=="1", prob, 1-prob)
+px1 <- mixture.example$px1
+px2 <- mixture.example$px2
+prob15 <- matrix(prob, length(px1), length(px2))
+png("myplot.png", width=4, height=4, units="in", res=300)
+par(mar=rep(2,4))
+contour(px1, px2, prob15, levels=0.5, labels="", xlab="", ylab="", main=
+        "15-nearest neighbour", axes=FALSE)
+points(x, col=ifelse(g==1, "coral", "cornflowerblue"))
+gd <- expand.grid(x=px1, y=px2)
+points(gd, pch=".", cex=1.2, col=ifelse(prob15>0.5, "coral", "cornflowerblue"))
+#box()
+dev.off()
+@
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.95\textwidth]{knn1.png}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.95\textwidth]{knn3.png}
+\end{minipage}
+\caption{\small{K nearest neighbors to classify the Iris dataset with (a) k = 1 and (b) k = 3.}}
+\end{figure}
+
+% \begin{figure}[h!]
+% \begin{center}
+% \includegraphics[width=0.8\textwidth]{myplot.png}
+% \end{center}
+% \end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Support vector machines (SVM)} find a linear decision surface ("hyperplane") that can separate classes and that has the largest distance between support vectors.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[height=0.45\textheight]{softmargin.png}
+\end{center}
+\caption{Find the value that minimizes the distance from the hyperplane, including any additional "slack" if data isn't separable.}
+\end{figure}
+
+% Source: http://efavdb.com/svm-classification/
+
+%http://efavdb.com/svm-classification/
+%https://www.quora.com/Support-Vector-Machines/What-is-the-difference-between-Linear-SVMs-and-Logistic-Regression
+% http://peekaboo-vision.blogspot.com/2012/12/kernel-approximations-for-efficient.html
+%http://www.bogotobogo.com/python/scikit-learn/scikit_machine_learning_Support_Vector_Machines_SVM_2.php
+%http://nlp.stanford.edu/IR-book/html/htmledition/nonlinear-svms-1.html
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+<<fig=FALSE, echo=FALSE, eval=FALSE>>=
+library(kernlab)
+
+svm_model= ksvm(class ~ x+ y, data=class_data, kernel='vanilladot')
+
+w = colSums(coef(svm_model)[[1]] * class_data[alphaindex(svm_model)[[1]],c('x','y')]) 
+b = b(svm_model)
+class_data[, 1:2] = sapply(class_data[,1:2], scale)
+
+p <- ggplot(class_data,aes(x, y, color=class)) +
+    geom_point(size=3) + geom_abline(intercept=b/w[1], slope=-w[2]/w[1]) + 
+    geom_abline(intercept=(b+1)/w[1], slope=-w[2]/w[1], linetype=2)+ 
+    geom_abline(intercept=(b-1)/w[1], slope=-w[2]/w[1], linetype=2)
+
+ggsave("svm_boundary.png", p)
+
+@
+
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.95\textwidth]{svm_boundary.png}
+\end{center}
+\caption{Support vector machine with decision boundaries.}
+\end{figure}
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[height=0.55\textheight]{kernel_trick.png}
+\end{center}
+\caption{Kernels transform data into higher dimensions to allow linear decision boundaries.}
+\end{figure}
+
+% Source IIR book: http://nlp.stanford.edu/IR-book/html/htmledition/irbook.html
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[height=0.55\textheight]{kernel_trick_3d.png}
+\end{center}
+\caption{Kernels transform data into higher dimensions to allow linear decision boundaries, example in 3-dimensions.}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Artificial neural networks} (ANN) are learning models that were directly inspired by the structure of biological neural networks.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.55\textwidth]{simple_perceptron.png}
+\end{center}
+\caption{A perceptron takes inputs, applies weights, and determines the output based on an activation function (such as a sigmoid).}
+\end{figure}
+
+\vspace{0.25in}
+
+\tiny{\textit{\href{https://medium.com/@jaschaephraim/elementary-neural-networks-with-tensorflow-c2593ad3d60b#.hidaox4qi}{Image source: @jaschaephraim}}}
+
+%http://cs231n.github.io/neural-networks-1/
+%Source: https://medium.com/@jaschaephraim/elementary-neural-networks-with-tensorflow-c2593ad3d60b#.8nuva6y4z
+%http://sebastianraschka.com/Articles/2015_singlelayer_neurons.html
+%https://stevenmiller888.github.io/mind-how-to-build-a-neural-network/
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{neural_net2.jpeg}
+\end{center}
+\caption{Multiple layers can be connected together.}
+\end{figure}
+
+%http://cs231n.github.io/convolutional-networks/
+%https://beckmw.wordpress.com/2013/11/14/visualizing-neural-networks-in-r-update/
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+<<fig=FALSE, echo=FALSE, eval=FALSE>>=
+library(ggplot2)
+library(caret) 
+N <- 200 # number of points per class
+D <- 2 # dimensionality
+K <- 4 # number of classes
+X <- data.frame() # data matrix (each row = single example)
+y <- data.frame() # class labels 
+set.seed(308) 
+for (j in (1:K)){  
+  r <- seq(0.05,1,length.out = N) # radius  
+  t <- seq((j-1)*4.7,j*4.7, length.out = N) + rnorm(N, sd = 0.3) # theta  
+  Xtemp <- data.frame(x =r*sin(t) , y = r*cos(t))   
+  ytemp <- data.frame(matrix(j, N, 1))  
+  X <- rbind(X, Xtemp)  
+  y <- rbind(y, ytemp)
+} 
+data <- cbind(X,y)
+colnames(data) <- c(colnames(X), 'label')
+
+x_min <- min(X[,1])-0.2; x_max <- max(X[,1])+0.2
+y_min <- min(X[,2])-0.2; y_max <- max(X[,2])+0.2
+ 
+# lets visualize the data:
+p <- ggplot(data) + geom_point(aes(x=x, y=y, color = as.character(label)), size = 2) + theme_bw(base_size = 0) +
+  xlim(x_min, x_max) + ylim(y_min, y_max) +
+  #ggtitle('Spiral Data Visualization') +
+  coord_fixed(ratio = 0.8) +
+  theme(axis.ticks=element_blank(), panel.grid.major = element_blank(), #panel.grid.minor = element_blank(), 
+        axis.text=element_blank(), axis.title=element_blank(), legend.position = 'none')
+ggsave("spiral.png", p, width=4, height=4)
+@
+
+<<eval=FALSE, echo=FALSE>>=
+X <- as.matrix(X)
+Y <- matrix(0, N*K, K)
+ 
+for (i in 1:(N*K)){
+  Y[i, y[i,]] <- 1
+}
+
+# %*% dot product, * element wise product
+nnet <- function(X, Y, step_size = 0.5, reg = 0.001, h = 10, niteration){
+  # get dim of input
+  N <- nrow(X) # number of examples
+  K <- ncol(Y) # number of classes
+  D <- ncol(X) # dimensionality
+ 
+  # initialize parameters randomly
+  W <- 0.01 * matrix(rnorm(D*h), nrow = D)
+  b <- matrix(0, nrow = 1, ncol = h)
+  W2 <- 0.01 * matrix(rnorm(h*K), nrow = h)
+  b2 <- matrix(0, nrow = 1, ncol = K)
+ 
+  # gradient descent loop to update weight and bias
+  for (i in 0:niteration){
+    # hidden layer, ReLU activation
+    hidden_layer <- pmax(0, X%*% W + matrix(rep(b,N), nrow = N, byrow = T))
+    hidden_layer <- matrix(hidden_layer, nrow = N)
+    # class score
+    scores <- hidden_layer%*%W2 + matrix(rep(b2,N), nrow = N, byrow = T)
+ 
+    # compute and normalize class probabilities
+    exp_scores <- exp(scores)
+    probs <- exp_scores / rowSums(exp_scores)
+ 
+    # compute the loss: sofmax and regularization
+    corect_logprobs <- -log(probs)
+    data_loss <- sum(corect_logprobs*Y)/N
+    reg_loss <- 0.5*reg*sum(W*W) + 0.5*reg*sum(W2*W2)
+    loss <- data_loss + reg_loss
+    # check progress
+    if (i%%1000 == 0 | i == niteration){
+      print(paste("iteration", i,': loss', loss))}
+ 
+    # compute the gradient on scores
+    dscores <- probs-Y
+    dscores <- dscores/N
+ 
+    # backpropate the gradient to the parameters
+    dW2 <- t(hidden_layer)%*%dscores
+    db2 <- colSums(dscores)
+    # next backprop into hidden layer
+    dhidden <- dscores%*%t(W2)
+    # backprop the ReLU non-linearity
+    dhidden[hidden_layer <= 0] <- 0
+    # finally into W,b
+    dW <- t(X)%*%dhidden
+    db <- colSums(dhidden)
+ 
+    # add regularization gradient contribution
+    dW2 <- dW2 + reg *W2
+    dW <- dW + reg *W
+ 
+    # update parameter 
+    W <- W-step_size*dW
+    b <- b-step_size*db
+    W2 <- W2-step_size*dW2
+    b2 <- b2-step_size*db2
+  }
+  return(list(W, b, W2, b2))
+}
+
+nnetPred <- function(X, para = list()){
+  W <- para[[1]]
+  b <- para[[2]]
+  W2 <- para[[3]]
+  b2 <- para[[4]]
+ 
+  N <- nrow(X)
+  hidden_layer <- pmax(0, X%*% W + matrix(rep(b,N), nrow = N, byrow = T)) 
+  hidden_layer <- matrix(hidden_layer, nrow = N)
+  scores <- hidden_layer%*%W2 + matrix(rep(b2,N), nrow = N, byrow = T) 
+  predicted_class <- apply(scores, 1, which.max)
+ 
+  return(predicted_class)  
+}
+ 
+nnet.model <- nnet(X, Y, step_size = 0.4,reg = 0.0002, h=50, niteration = 6000)
+## [1] "iteration 0 : loss 1.38628868932674"
+## [1] "iteration 1000 : loss 0.967921639616882"
+## [1] "iteration 2000 : loss 0.448881467342854"
+## [1] "iteration 3000 : loss 0.293036646147359"
+## [1] "iteration 4000 : loss 0.244380009480792"
+## [1] "iteration 5000 : loss 0.225211501612035"
+## [1] "iteration 6000 : loss 0.218468573259166"
+predicted_class <- nnetPred(X, nnet.model)
+print(paste('training accuracy:',mean(predicted_class == (y))))
+## [1] "training accuracy: 0.96375"
+
+# plot the resulting classifier
+hs <- 0.01
+grid <- as.matrix(expand.grid(seq(x_min, x_max, by = hs), seq(y_min, y_max, by =hs)))
+Z <- nnetPred(grid, nnet.model)
+ 
+p2 <- ggplot()+
+  geom_tile(aes(x = grid[,1],y = grid[,2],fill=as.character(Z)), alpha = 0.3, show.legend = F)+ 
+  geom_point(data = data, aes(x=x, y=y, color = as.character(label)), size = 2) + theme_bw(base_size = 0) +
+  #ggtitle('Neural Network Decision Boundary') +
+  coord_fixed(ratio = 0.8) + 
+  theme(axis.ticks=element_blank(), panel.grid.major = element_blank(), panel.grid.minor = element_blank(), 
+        axis.text=element_blank(), axis.title=element_blank(), legend.position = 'none')
+
+ggsave("spiral2.png", p2, width=4, height = 4)
+
+@
+
+Multi-layer neural networks can fit complex functions:
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.9\textwidth]{spiral.png}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.9\textwidth]{spiral2.png}
+\end{minipage}
+\caption{Spiral dataset with 4 different classes.  The shaded region represents the neural network's predictions.}
+\end{figure}
+
+
+% Source: http://junma5.weebly.com/data-blog/build-your-own-neural-network-classifier-in-r
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Trees} "come[s] closest to meeting the requirements for serving as an off-the-shelf procedure for data mining". (Hastie et al., ESL)
+%, because it is invariant under scaling and various other transformations of feature values, is robust to inclusion of irrelevant features, and produces inspectable models. 
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{dt.png}
+\end{center}
+%\caption{Titanic data from Kaggle competition shows a pattern predicting who survived: more likely to be female, wealthy, and/or young.  Can we model this?}
+\end{figure}
+
+%https://www.analyticsvidhya.com/blog/2016/04/complete-tutorial-tree-based-modeling-scratch-in-python/
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+<<fig=FALSE, echo=FALSE, eval=FALSE>>=
+titanic <- read.csv("https://raw.githubusercontent.com/Geoyi/Cleaning-Titanic-Data/master/titanic_clean.csv")
+titanic <- titanic[-1310,]
+posn.j <- position_jitter(0.5, 0)
+p <- ggplot(titanic,aes(x=factor(pclass),y=age,col=factor(sex)))+
+  geom_jitter(size=3,alpha=0.5)+#,position=posn.j)+
+  facet_grid(". ~ survived")
+ggsave("titanic_scatter.png", p, width=8, height=4)
+@
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.8\textwidth]{titanic_scatter.png}
+\end{center}
+\caption{Titanic data from Kaggle competition shows a pattern predicting who survived: more likely to be female, wealthy, and/or young.  Can we model this?}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+%https://en.wikipedia.org/wiki/Decision_tree_learning
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.6\textwidth]{CART_tree_titanic_survivors.png}
+\end{center}
+\caption{A decision tree that predicts who survived the Titanic, constructed using CART.}
+\end{figure}
+
+%https://rpubs.com/violetgirl/201322
+%https://rpubs.com/minma/cart_with_rpart
+%http://hamelg.blogspot.com/2015/09/introduction-to-r-part-29-decision-trees.html
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Unsupervised Learning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+
+\begin{adjustbox}{max totalsize={.9\textwidth}{.9\textheight},center}
+\begin{tikzpicture}[
+  mindmap,
+  every node/.style={concept, execute at begin node=\hskip0pt},
+  root concept/.append style={
+    concept color=black, fill=white, line width=1ex, text=black
+  },
+  text=white, grow cyclic,
+  level 1/.append style={level distance=4.5cm,sibling angle=90},
+  level 2/.append style={level distance=3cm,sibling angle=45}
+]
+
+\node[root concept, scale=0.8] {Machine Learning} % root
+child[concept color=red!90, rotate=-45] { node [concept,scale=1.1]{Unsupervised Learning}
+child[concept color=red!50] { node [concept,scale=1.1]{K-Means Clustering} }
+child[concept color=red!50] { node [concept,scale=1.1]{Hierarchical Clustering} }
+}
+child[concept color=gray!90, rotate=0] { node [concept,scale=0.8]{Supervised Learning}
+child[concept color=gray!50] { node [concept,scale=0.8]{Linear Regression} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Logistic Regression} }
+child[concept color=gray!50] { node [concept,scale=0.8]{SVM} }
+child[concept color=gray!50] { node [concept,scale=0.8]{kNN} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Neural Networks} }
+}
+child[concept color=gray!90, rotate=45] { node  [concept,scale=0.8]{Reinforcement Learning}
+child[concept color=gray!50] { node [concept,scale=0.8]{Multi-armed bandits} }
+child[concept color=gray!50] { node [concept,scale=0.8]{MDP} }
+child[concept color=gray!50] { node [concept,scale=0.8]{POMDP} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Adversarial RL} }
+};
+\end{tikzpicture}
+\end{adjustbox}
+\end{center}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}
+
+\begin{center}
+\huge{Unsupervised Learning}
+\end{center}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Unsupervised learning} involves learning the labels for an unlabled dataset.
+
+\vspace{0.25in}
+%\pause
+
+Examples of models:
+
+\begin{itemize}
+\item K-means clustering
+\item Hierarchical clustering
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{K-means clustering} aims to partition data into k clusters, so that each observation belongs to the cluster with the nearest mean (which is found using the "centroid" of all the observations in each cluster).
+
+<<fig=TRUE, echo=FALSE, eval=FALSE>>=
+library(ggplot2)
+p <- (ggplot(iris, aes(Petal.Length, Petal.Width, color = Species)) + geom_point())
+ggsave("iris_cluster1.png", p, width=4, height =4)
+
+set.seed(20)
+irisCluster <- kmeans(iris[, 3:4], 3, nstart = 20)
+
+irisCluster$cluster <- as.factor(irisCluster$cluster)
+iris[,"Cluster"] <- irisCluster$cluster
+p2 <- ggplot(iris, aes(Petal.Length, Petal.Width, color = Cluster)) + geom_point(aes(Petal.Length, Petal.Width, color = Cluster)) + geom_point(data=as.data.frame(irisCluster$centers), aes(Petal.Length, Petal.Width), col = scales::muted(c("red", "green", "blue")),
+             pch = 'x', size = 12)
+ggsave("iris_cluster2.png", p2, width=4, height =4)
+@
+%https://datascienceplus.com/k-means-clustering-in-r/
+
+\begin{figure}[h!]
+\centering
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.9\textwidth]{iris_cluster1.png}
+\end{minipage}%
+\begin{minipage}{.5\textwidth}
+  \centering
+  \includegraphics[width=0.9\textwidth]{iris_cluster2.png}
+\end{minipage}
+\caption{Iris dataset with (a) original labels and (b) 3-mean clusters.}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+
+\begin{adjustbox}{max totalsize={.9\textwidth}{.9\textheight},center}
+\begin{tikzpicture}[
+  mindmap,
+  every node/.style={concept, execute at begin node=\hskip0pt},
+  root concept/.append style={
+    concept color=black, fill=white, line width=1ex, text=black
+  },
+  text=white, grow cyclic,
+  level 1/.append style={level distance=4.5cm,sibling angle=90},
+  level 2/.append style={level distance=3cm,sibling angle=45}
+]
+
+\node[root concept, scale=0.8] {Machine Learning} % root
+child[concept color=gray!90, rotate=-45] { node [concept,scale=0.8]{Unsupervised Learning}
+child[concept color=gray!50] { node [concept,scale=0.8]{K-Means Clustering} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Hierarchical Clustering} }
+}
+child[concept color=gray!90, rotate=0] { node [concept,scale=0.8]{Supervised Learning}
+child[concept color=gray!50] { node [concept,scale=0.8]{Linear Regression} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Logistic Regression} }
+child[concept color=gray!50] { node [concept,scale=0.8]{SVM} }
+child[concept color=gray!50] { node [concept,scale=0.8]{kNN} }
+child[concept color=gray!50] { node [concept,scale=0.8]{Neural Networks} }
+}
+child[concept color=green!50!black, rotate=45] { node  [concept,scale=1.1]{Reinforcement Learning}
+child[concept color=green!80!black] { node [concept,scale=1.1]{Multi-armed bandits} }
+child[concept color=green!80!black] { node [concept,scale=1.1]{MDP} }
+child[concept color=green!80!black] { node [concept,scale=1.1]{POMDP} }
+child[concept color=green!80!black] { node [concept,scale=1.1]{Adversarial RL} }
+};
+\end{tikzpicture}
+\end{adjustbox}
+\end{center}
+\end{figure}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Reinforcement Learning}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{center}
+\huge{Reinforcement Learning}
+\end{center}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Reinforcement  learning} is an example of \emph{online learning} which tries to learn a \emph{policy} (set of actions) based on receiving rewards to maximize a long-run expected value.
+
+%\pause
+
+\vspace{0.25in}
+
+Examples of models:
+
+\begin{itemize}
+  \item Multi-armed bandit
+  \item Markov decision process (MDP)
+  \item Partially-observable markov decision process (POMDP)
+  \item Multi-agent reinforcement learning
+\end{itemize}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+In a single agent version, we consider two major components: the \emph{agent} and the \emph{environment}.  
+
+\begin{figure}[H]
+\begin{center}
+\begin{tikzpicture}[->,>=stealth',shorten >=1pt,auto,node distance=2cm,
+  thick,main
+  node/.style={circle,fill=myblue,draw,text=white,font=\sffamily\Large\bfseries}]
+ %nodes
+ \node[] (center);
+ % We make a dummy figure to make everything look nice.
+ \node[top=of center, fill=myblue, text=white] (t) {Agent};
+ \node[below=of center, fill=myblue, text=white] (g) {Environment};
+
+  \path[every node/.style={font=\sffamily\small}]
+  (t) edge[bend left=65] node[auto] {Action} (g)
+  (g) edge[bend left=65] node[auto] {Reward, State} (t);
+\end{tikzpicture}
+\end{center}
+% \caption[Generalized Policy Iteration]
+%  {The reinforcement learning cycle, from agent to environment, back to agent.}
+  \label{fig:reinforcement_cycle}
+\end{figure}
+
+The agent takes actions, and receives updates in the form of state/reward pairs.
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\frame{\frametitle{Multi-Armed Bandits} 
+
+A simple introduction to the reinforcement learning problem is the case when there is only one state, also called a \href{http://en.wikipedia.org/wiki/Multi-armed_bandit}{\emph{multi-armed bandit}}.  This was named after the slot machines (one-armed bandits).
+
+%\pause
+
+\vspace{5mm}
+
+\begin{beamerboxesrounded}[shadow=true]{Definition}
+\begin{itemize}
+  \item Set of actions $A = {1, ..., n}$
+  \item Each action gives you a random reward with distribution $P(r_t|a_t = i)$
+  \item The value (or utility) is $V = \sum_t r_t$
+\end{itemize}
+\end{beamerboxesrounded}
+
+
+}
+}
+
+\frame{%\frametitle{Exploration vs. Exploitation} 
+
+Online learning are a form of sequential optimization, and need to solve the \emph{exploration vs. exploitation trade-off}.
+
+%\pause
+
+\begin{columns}[T] % align columns
+\begin{column}{.4\textwidth}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[height=0.9\textheight, keepaspectratio]{src/reinforcement/images/e_e_1.png}
+\end{center}
+\end{figure}
+
+%\pause
+
+\end{column}%
+\hfill%
+\begin{column}{0.6\textwidth}
+
+\begin{figure}[H]
+\begin{center}
+\includegraphics[height=0.9\textheight, keepaspectratio]{src/reinforcement/images/e_e_2.png}
+\end{center}
+\end{figure}
+
+\end{column}%
+\end{columns}
+
+}
+
+
+\frame{%\frametitle{$\epsilon$-Greedy} 
+
+The $\epsilon$-Greedy algorithm is one of the simplest and yet most popular approaches to solving the exploration/exploitation dilemma.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.7\textwidth]{src/reinforcement/images/epsilongreedy.png}
+\end{center}
+\end{figure}
+
+
+\vspace{5 mm}
+
+\tiny{\href{http://blog.yhathq.com/posts/the-beer-bandit.html}{(Picture courtesy of "Python Multi-armed Bandits" by Eric Chiang, yhat)}}
+
+}
+
+\frame{%\frametitle{Markov Processes} 
+
+\emph{Markov Processes} are elementary in time series analysis.  
+
+\begin{figure}[H]
+
+\begin{center}
+\begin{tikzpicture}[]
+% states
+\node[state] (s1) at (0,2) {$s_1$};
+\node[state] (s2) at (2,2) {$s_2$}
+    edge [<-] (s1);
+\node[state] (s3) at (4,2) {$s_3$}
+    edge [<-] (s2);
+\node[state] (s4) at (6,2) {$s_4$}
+    edge [<-] (s3);
+\end{tikzpicture}
+\end{center}
+
+\end{figure}
+
+\begin{beamerboxesrounded}[shadow=true]{Definition}
+\begin{equation}
+P(s_{t+1} | s_t, ..., s_1) = P(s_{t+1} | s_t)
+\end{equation}
+
+\begin{itemize}
+\item $s_t$ is the state of the markov process at time $t$.
+\end{itemize}
+\end{beamerboxesrounded}
+
+
+}
+
+
+\frame{%\frametitle{Markov Decision Process (MDP)} 
+
+A \emph{Markov Decision Process (MDP)} adds some further structure to the problem.  
+
+% (Related to Stochastic Shortest Path problem: http://www.mit.edu/people/dimitrib/Stochasticsp.pdf)
+
+
+\begin{figure}[H]
+
+\begin{center}
+\begin{tikzpicture}[]
+% states
+\node[state] (s1) at (0,2) {$s_1$};
+\node[state] (s2) at (2,2) {$s_2$}
+    edge [<-] (s1);
+\node[state] (s3) at (4,2) {$s_3$}
+    edge [<-] (s2);
+\node[state] (s4) at (6,2) {$s_4$}
+    edge [<-] (s3);
+% actions
+\node[rectangle] (a1) at (0,0) [draw,thick,minimum width=1cm,minimum height=1cm] {$a_1$}
+    edge [->] (s2);
+\node[rectangle] (a2) at (2,0) [draw,thick,minimum width=1cm,minimum height=1cm] {$a_2$}
+    edge [->] (s3);
+\node[rectangle] (a3) at (4,0) [draw,thick,minimum width=1cm,minimum height=1cm] {$a_3$}
+    edge [->] (s4);
+% rewards
+\node[diamond] (r1) at (2,4) [draw,thick,minimum width=1cm,minimum height=1cm] {$r_1$}
+    edge [<-] (s1);
+\node[diamond] (r2) at (4,4) [draw,thick,minimum width=1cm,minimum height=1cm] {$r_2$}
+    edge [<-] (s2);
+\node[diamond] (r3) at (6,4) [draw,thick,minimum width=1cm,minimum height=1cm] {$r_3$}
+    edge [<-] (s3);
+
+\draw (a1) edge [->] (r1);
+\draw (a2) edge [->] (r2);
+\draw (a3) edge [->] (r3);
+
+\end{tikzpicture}
+\end{center}
+
+\end{figure}
+
+}
+
+\frame{%\frametitle{Grid World} 
+
+Grid world is a canonical example used in reinforcement learning.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics{src/reinforcement/images/maze_1.png}
+\end{center}
+\end{figure}
+
+%http://www0.cs.ucl.ac.uk/staff/D.Silver/web/Teaching_files/intro_RL.pdf
+
+}
+
+\frame{%\frametitle{Grid World} 
+
+We need to find a policy to navigate through the maze.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics{src/reinforcement/images/maze_2.png}
+\end{center}
+\end{figure}
+
+}
+
+\frame{%\frametitle{Grid World} 
+
+The policy is based on maximizing a value function, that is dependent on the state and action pair $(S, A)$.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics{src/reinforcement/images/maze_3.png}
+\end{center}
+\end{figure}
+
+}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Meta Algorithms}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{center}
+\huge{Meta Algorithms}
+\end{center}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+Several of the most successful recent algorithms make use of \emph{ensemble methods} to reduce variance.  
+
+\begin{itemize}
+  \item Bagging (bootstrap aggregation)
+  \item Boosting
+\end{itemize}
+
+%\pause
+
+Other recent advances are a result of combining multiple techniques, such as Deep Reinforcement Learning, which combines a multilayer neural network with reinforcement learning.
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Random Forests} (Breiman 2001) is an ensemble method, using a bagging of decision trees. 
+
+%Trees that are grown very deep tend to learn highly irregular patterns: they overfit their training sets, i.e. have low bias, but very high variance. Random forests are a way of averaging multiple deep decision trees, trained on different parts of the same training set, with the goal of reducing the variance. This comes at the expense of a small increase in the bias and some loss of interpretability, but generally greatly boosts the performance of the final model.
+
+%\pause
+
+\vspace{0.25in}
+
+Random forests differ in only one way from this general scheme: at each split, they select a random subset of the features ("feature bagging"); this improves performance over bagged trees by decorrelating each tree.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.85\textwidth]{randomforest.png}
+\end{center}
+\end{figure}
+
+
+\vspace{0.25in}
+
+\tiny{\textit{\href{http://provectus.com/blog/news/research-paper-for-load-forecast/}{Image source: Porvectus.}}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Gradient boosting} machines (GBM) also uses decision trees, but uses boosting: combining many weak learners (Friedman 1999).  GBM refits each subsequent tree on the residuals of the prior fit, thus resulting in less correlated trees.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.95\textwidth]{gbm_tress.png}
+\end{center}
+\end{figure}
+
+%http://arogozhnikov.github.io/2016/07/05/gradient_boosting_playground.html
+%https://www.quora.com/How-would-you-explain-gradient-boosting-machine-learning-technique-in-no-more-than-300-words-to-non-science-major-college-students
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\href{https://en.wikipedia.org/wiki/Deep_learning}{\emph{Deep Learning}} employs multiple levels (hierarchy) of representations, often in the form of a large and wide neural network.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.95\textwidth]{revo_in_depth.png}
+\end{center}
+\end{figure}
+
+%https://medium.com/@Lidinwise/the-revolution-of-depth-facf174924f5#.66gerjcg5
+%http://torch.ch/blog/2016/02/04/resnets.html
+%http://playground.tensorflow.org/#activation=tanh&regularization=L1&batchSize=10&dataset=circle&regDataset=reg-plane&learningRate=0.03&regularizationRate=0.01&noise=20&networkShape=5,2,2&seed=0.62288&showTestData=false&discretize=false&percTrainData=50&x=true&y=true&xTimesY=false&xSquared=false&ySquared=false&cosX=false&sinX=false&cosY=false&sinY=false&collectStats=false&problem=regression&initZero=false&hideText=false
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\textwidth]{lenet5.jpg}
+\caption{LeNET (1998), Yann LeCun et. al.}
+\par\vfill
+\includegraphics[width=0.9\textwidth]{alexnet_small.png}
+\caption{AlexNET (2012), Alex Krizhevsky, Ilya Sutskever and Geoff Hinton}
+\end{center}
+%\caption{Titanic data from Kaggle competition shows a pattern predicting who survived: more likely to be female, wealthy, and/or young.  Can we model this?}
+\end{figure}
+
+\tiny{\emph{Source: \href{http://cs231n.github.io/convolutional-networks/}{Andrej Karpathy}}}
+
+%https://arxiv.org/pdf/1605.07678.pdf
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+% \begin{frame}
+% 
+% Self driving cars
+% 
+% http://janhuenermann.com/projects/learning-to-drive
+% 
+% \end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Generative adversarial networks} (Goodfellow 2014) is an example of dueling neural networks which can learn about different kinds of information (e.g. photos, video, music) and generate new versions.
+
+\vspace{0.25in}
+
+\begin{itemize}
+  \item Generator network: simulate fake data.
+  \item Descriminator network: distinguish between fake and real data.
+\end{itemize}
+
+% https://en.wikipedia.org/wiki/Generative_adversarial_networks
+% https://hackernoon.com/how-do-gans-intuitively-work-2dda07f247a1#.r9lgkur76
+%https://www.slideshare.net/ThomasDaSilvaPaula/a-very-gentle-introduction-to-generative-adversarial-networks-aka-gans-71614428
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\emph{Generalization} remains one of the greatest challenges to existing machine learning models.
+
+\vspace{0.25in}
+
+\emph{Transfer Learning} is a topic within machine learning that tries to generalize from one problem to another.
+
+%Meta-learning
+%https://medium.com/intuitionmachine/deep-learning-the-unreasonable-effectiveness-of-randomness-14d5aef13f87#.6s9gw9n6f
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+Pathnet (Deepmind 2017) uses multiple deep neural networks trained on different problems, and finds that a network already trained on a problem can learn more quickly on a new task.  
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.65\textwidth]{pathnet_arch.png}
+\end{center}
+\caption{\small{"It is a neural network algorithm that uses agents embedded in the neural network whose task is to discover which parts of the network to re-use for new tasks."}}
+\end{figure}
+
+%https://medium.com/intuitionmachine/pathnet-a-modular-deep-learning-architecture-for-agi-5302fcf53273#.j1dcqc300
+%https://arxiv.org/pdf/1701.08734.pdf
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{frame}
+
+AlphaGo used several neural networks.
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.95\textwidth]{alphago_network.png}
+\end{center}
+\end{figure}
+
+%http://deeplearningskysthelimit.blogspot.com/2016/04/part-2-alphago-under-magnifying-glass.html
+%https://www.tastehit.com/blog/google-deepmind-alphago-how-it-works/
+
+\end{frame}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Conclusion}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+\begin{center}
+\huge{Final Thoughts}
+\end{center}
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+Fully automonomous (general) artificial intelligence is evolving quickly...
+
+%\pause
+
+\vspace{0.25in}
+
+...but machine learning benefits from \emph{domain expertise}.
+
+\begin{itemize}
+  \item \href{https://en.wikipedia.org/wiki/Wicked_problem}{\emph{Wicked problems}} vs. tame problems (Rittel and Webber 1973)
+  \item \href{https://en.wikipedia.org/wiki/No_free_lunch_in_search_and_optimization}{\emph{No Free Lunch Theorem}} (Wolpert 1996)
+  \item \emph{Occam's Razor}
+\end{itemize}
+
+%http://www.zabaras.com/Courses/BayesianComputing/Papers/lack_of_a_priori_distinctions_wolpert.pdf
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+Always important to make black box learning as "light box" as possible: don't turn your model into a "weapon of math distruction" (WMD).
+
+%\pause
+
+\vspace{0.25in}
+
+Model objectives and constraints come from researchers.
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
