@@ -1130,6 +1130,21 @@ ggsave("figures/lasso_coef.png")
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{frame}
+
+We can generalize most machine learning problems down to a loss function:
+
+\begin{equation*}
+J(w) = \sum_i{L(m_i(w)) + \lambda R(w)}
+\end{equation*}
+
+%http://www.ics.uci.edu/~dramanan/teaching/ics273a_winter08/lectures/lecture14.pdf
+
+\end{frame}
+%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%
 % \begin{frame}
 % 
 % Another way to solve for overfitting is to use \emph{regularization}.
