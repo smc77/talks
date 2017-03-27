@@ -1,6 +1,6 @@
 # Probably Approximately Correct: A Very Brief Tour of All of Machine Learning
 
-This talk was intended to provide a shallow overview of the field of machine learning for an audience who (on average) had very little exposure to the topic but were quantitatively sophisticated.  The talk also provided a reference for references throughout the rest of the conference.
+This talk was intended to provide a shallow overview of the field of machine learning for an audience who (on average) had very little exposure to the topic but were quantitatively sophisticated.  The talk also provided a reference for other talks throughout the rest of the conference.
 
 The talk follows a rough outline:
 
