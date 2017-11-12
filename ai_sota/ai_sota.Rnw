@@ -573,7 +573,6 @@ There are many other examples of recent successes:
   \item Robotics
 \end{itemize}
 
-
 }
 
 
